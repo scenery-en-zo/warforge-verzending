@@ -1,0 +1,87 @@
+{
+  "_uitleg": "Tarieven in EUR incl. btw, per zone. Brievenbuspakket alleen waar 'letterbox' staat (NL) en alleen als de bestelling in één A5-brievenbuspakket past. Pakket: eerste band waarvan max_kg >= gewicht wint.",
+  "currency": "EUR",
+  "zones": [
+    {
+      "countries": [
+        "NL"
+      ],
+      "letterbox": 4.95,
+      "parcel": [
+        {
+          "max_kg": 10,
+          "price": 7.75,
+          "name": "Standaard Pakket Binnen Nederland"
+        },
+        {
+          "max_kg": 23,
+          "price": 12.5,
+          "name": "Pakket zwaar 10-23 kg"
+        }
+      ]
+    },
+    {
+      "countries": [
+        "BE"
+      ],
+      "parcel": [
+        {
+          "max_kg": 10,
+          "price": 9.95,
+          "name": "Standaard Pakket Binnen Belgie"
+        }
+      ]
+    },
+    {
+      "countries": [
+        "DE"
+      ],
+      "parcel": [
+        {
+          "max_kg": 10,
+          "price": 9.95,
+          "name": "Standardpaket"
+        }
+      ]
+    },
+    {
+      "countries": [
+        "AT",
+        "BG",
+        "HR",
+        "CZ",
+        "DK",
+        "EE",
+        "FI",
+        "FR",
+        "GR",
+        "HU",
+        "IT",
+        "LV",
+        "LT",
+        "LU",
+        "NO",
+        "PL",
+        "PT",
+        "RO",
+        "SK",
+        "SI",
+        "ES",
+        "SE",
+        "CH"
+      ],
+      "parcel": [
+        {
+          "max_kg": 2,
+          "price": 12.95,
+          "name": "Package Up To 2kg"
+        },
+        {
+          "max_kg": 5,
+          "price": 17.5,
+          "name": "Package From 2kg - 5kg"
+        }
+      ]
+    }
+  ]
+}

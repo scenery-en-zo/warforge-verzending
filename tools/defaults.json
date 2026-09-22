@@ -1,0 +1,16 @@
+{
+  "_uitleg": "Brievenbuscapaciteit = hoeveel stuks passen in één A5-brievenbuspakket. 0 = past nooit. Volgorde: product-metaveld > by_collection > by_tag > by_vendor_type > by_type > default. Een regel mag een getal zijn of {\"cap\": n, \"groep\": \"naam\"}; producten met een groep mogen alleen met dezelfde groep samen in een brievenbuspakket.",
+  "letterbox_max_grams": 2000,
+  "item_max_grams": 250,
+  "default": 2,
+  "by_type": {
+    "Paint": 10, "Brush": 8, "Base": 4, "Bases": 4, "Material": 2,
+    "Terrain": 0, "Tool": 1, "Miniature": 5, "Spons": 5
+  },
+  "by_vendor_type": {
+    "Reaper Miniatures|Miniature": { "weight_bands": [[30, 5], [85, 2]], "else": 0 },
+    "The Army Painter|Paint": 0
+  },
+  "by_collection": {},
+  "by_tag": {}
+}

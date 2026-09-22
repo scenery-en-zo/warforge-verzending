@@ -72,3 +72,10 @@ registration in Shopify (`carrierServiceCreate` with callback `https://<worker>/
 - `GET /health`
 
 Logs: `npm run tail`.
+
+## Tools (Python, credentials from D:\Projectserzendingen\.env)
+
+- `tools/register_carrier.py <callback-url>` register/update the carrier service in Shopify
+- `tools/profiles_carrier.py show|1 <carrierGid>|2|3` switch the delivery profile to the carrier
+- `tools/setshop.py` / `tools/setrates.py` write `defaults.json` / `rates.json` to the shop metafields
+- `tools/smoke.py` signed end-to-end requests against the live Worker
