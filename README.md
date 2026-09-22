@@ -73,7 +73,7 @@ registration in Shopify (`carrierServiceCreate` with callback `https://<worker>/
 
 Logs: `npm run tail`.
 
-## Tools (Python, credentials from D:\Projectserzendingen\.env)
+## Tools (Python, credentials from D:/Projects/verzendingen/.env)
 
 - `tools/register_carrier.py <callback-url>` register/update the carrier service in Shopify
 - `tools/profiles_carrier.py show|1 <carrierGid>|2|3` switch the delivery profile to the carrier
