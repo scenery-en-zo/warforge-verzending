@@ -4,6 +4,11 @@ Shopify **carrier service** (third-party carrier-calculated shipping) that decid
 checkout whether an order ships as a **brievenbuspakket** (letterbox parcel) or a
 **pakket**, and returns the matching rate. Runs on Cloudflare Workers (free tier), stateless.
 
+## Handleiding voor de winkel (Nederlands)
+
+`docs/index.html`, gepubliceerd via GitHub Pages door `.github/workflows/pages.yml`:
+https://scenery-en-zo.github.io/warforge-verzending/
+
 ## How it decides
 
 Every product has a **brievenbuscapaciteit**: how many pieces fit in ONE A5

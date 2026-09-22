@@ -1,4 +1,11 @@
-<title>Brievenbus of Pakket</title>
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Brievenbus of Pakket · Scenery en Zo</title>
+<meta name="description" content="Hoe de webshop van Scenery en Zo kiest tussen brievenbuspakket en pakket, en welke waarden je zelf in Shopify kunt aanpassen.">
+<meta name="robots" content="noindex">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
 :root{
@@ -20,6 +27,7 @@
   --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
 }
 *{box-sizing:border-box}
+html{color-scheme:light dark}
 body{margin:0;background:var(--ground);color:var(--ink);font:17px/1.55 "Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;padding-block:0 64px;padding-inline:16px}
 a{color:var(--green)}
 :focus-visible{outline:2px solid var(--focus);outline-offset:2px}
@@ -78,6 +86,8 @@ dl.faq dd{margin:4px 0 0}
 footer{grid-column:1/-1;margin-top:24px;padding-top:20px;border-top:1px solid var(--line);font-size:14px;color:var(--ink-2)}
 @media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
 </style>
+</head>
+<body>
 
 <div class="wrap">
 <header class="top">
@@ -411,3 +421,5 @@ footer{grid-column:1/-1;margin-top:24px;padding-top:20px;border-top:1px solid va
   Techniek, voor wie het wil weten: de module is een Cloudflare Worker (<code>sceneryenzo-verzendregels</code>), gekoppeld als carrier service via de Shopify-app "Product Brievenbuspakket". Broncode en tools: GitHub <code>scenery-en-zo/warforge-verzending</code>. De regels en tarieven staan níét in de code maar in de twee shop-metavelden hierboven.
 </footer>
 </div>
+</body>
+</html>
