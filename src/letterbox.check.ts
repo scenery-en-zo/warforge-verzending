@@ -47,8 +47,8 @@ const cfg: RatesConfig = { currency: "EUR", zones: [
   { countries: ["BE"], parcel: [{ max_kg: 10, price: 9.95 }] },
   { countries: ["AT", "FR"], parcel: [{ max_kg: 2, price: 12.95 }, { max_kg: 5, price: 17.5 }] },
 ] };
-assert.deepEqual(ratesFor("NL", 500, true, cfg).map((r) => [r.service_code, r.total_price]), [["BRIEVENBUS", "495"]]);
-assert.deepEqual(ratesFor("NL", 500, false, cfg).map((r) => [r.service_code, r.total_price]), [["PAKKET_10", "775"]]);
+assert.deepEqual(ratesFor("NL", 500, true, cfg).map((r) => [r.service_code, r.total_price]), [["Brievenbuspakket", "495"]]);
+assert.deepEqual(ratesFor("NL", 500, false, cfg).map((r) => [r.service_code, r.total_price]), [["PAKKET_10", "775"]], "unnamed band keeps the PAKKET_<kg> code");
 assert.deepEqual(ratesFor("NL", 12000, false, cfg).map((r) => r.total_price), ["1250"]);
 assert.deepEqual(ratesFor("BE", 500, true, cfg).map((r) => r.service_code), ["PAKKET_10"], "no letterbox outside NL even if it fits");
 assert.deepEqual(ratesFor("FR", 2500, false, cfg).map((r) => r.total_price), ["1750"]);

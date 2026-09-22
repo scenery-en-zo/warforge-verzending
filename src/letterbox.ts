@@ -141,14 +141,15 @@ export type RateOut = { service_name: string; service_code: string; total_price:
 export function ratesFor(countryCode: string, totalGrams: number, fits: boolean, cfg: RatesConfig): RateOut[] {
   const zone = cfg.zones.find((z) => z.countries.includes(countryCode));
   if (!zone) return [];
+  // service_code equals the visible name: the PostNL app may match orders on the shipping line code.
   const out: RateOut[] = [];
   const cents = (eur: number) => String(Math.round(eur * 100));
   if (fits && typeof zone.letterbox === "number") {
-    out.push({ service_name: "Brievenbuspakket", service_code: "BRIEVENBUS", total_price: cents(zone.letterbox), currency: cfg.currency, description: "Past door de brievenbus" });
+    out.push({ service_name: "Brievenbuspakket", service_code: "Brievenbuspakket", total_price: cents(zone.letterbox), currency: cfg.currency, description: "Past door de brievenbus" });
     return out; // letterbox is the only option when it fits
   }
   const kg = totalGrams / 1000;
   const band = zone.parcel.find((b) => kg <= b.max_kg) ?? zone.parcel[zone.parcel.length - 1];
-  if (band) out.push({ service_name: band.name ?? "Pakket", service_code: `PAKKET_${band.max_kg}`, total_price: cents(band.price), currency: cfg.currency });
+  if (band) out.push({ service_name: band.name ?? "Pakket", service_code: band.name ?? `PAKKET_${band.max_kg}`, total_price: cents(band.price), currency: cfg.currency });
   return out;
 }
