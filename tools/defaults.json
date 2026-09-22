@@ -4,11 +4,30 @@
   "item_max_grams": 250,
   "default": 2,
   "by_type": {
-    "Paint": 10, "Brush": 8, "Base": 4, "Bases": 4, "Material": 2,
-    "Terrain": 0, "Tool": 1, "Miniature": 5, "Spons": 5
+    "Paint": 10,
+    "Brush": 8,
+    "Base": 4,
+    "Bases": 4,
+    "Material": 2,
+    "Terrain": 1,
+    "Tool": 1,
+    "Miniature": 5,
+    "Spons": 5
   },
   "by_vendor_type": {
-    "Reaper Miniatures|Miniature": { "weight_bands": [[30, 5], [85, 2]], "else": 0 },
+    "Reaper Miniatures|Miniature": {
+      "weight_bands": [
+        [
+          30,
+          5
+        ],
+        [
+          85,
+          2
+        ]
+      ],
+      "else": 0
+    },
     "The Army Painter|Paint": 0
   },
   "by_collection": {},
