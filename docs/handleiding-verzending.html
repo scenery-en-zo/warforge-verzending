@@ -1,0 +1,413 @@
+<title>Brievenbus of Pakket</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --ground:#F7F6F1; --paper:#FFFFFF; --ink:#1E2622; --ink-2:#55635C; --line:#DAD8CE;
+  --green:#2E5C4D; --green-soft:#E3EDE7; --orange:#D9622A; --orange-soft:#FBE9DF;
+  --sand:#EFEBDF; --mono-bg:#F1F0EA; --focus:#2E5C4D;
+  --shadow:0 1px 2px rgba(30,38,34,.06),0 8px 24px -12px rgba(30,38,34,.18);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --ground:#151C19; --paper:#1D2622; --ink:#E9EDEA; --ink-2:#A5B0AA; --line:#33403A;
+  --green:#8FC3AF; --green-soft:#223730; --orange:#F09361; --orange-soft:#3D2A1F;
+  --sand:#262F2A; --mono-bg:#242D28; --focus:#8FC3AF;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+}}
+:root[data-theme="dark"]{
+  --ground:#151C19; --paper:#1D2622; --ink:#E9EDEA; --ink-2:#A5B0AA; --line:#33403A;
+  --green:#8FC3AF; --green-soft:#223730; --orange:#F09361; --orange-soft:#3D2A1F;
+  --sand:#262F2A; --mono-bg:#242D28; --focus:#8FC3AF;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:17px/1.55 "Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;padding-block:0 64px;padding-inline:16px}
+a{color:var(--green)}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.wrap{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:220px minmax(0,1fr);gap:48px}
+@media (max-width:860px){.wrap{grid-template-columns:minmax(0,1fr);gap:0}}
+header.top{grid-column:1/-1;padding-block:48px 24px;border-bottom:1px solid var(--line);margin-bottom:32px}
+.eyebrow{font:600 12px/1 "Source Sans 3",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--orange);margin:0 0 14px}
+h1{font:700 clamp(34px,5vw,52px)/1.05 "Fraunces",Georgia,serif;margin:0 0 14px;text-wrap:balance;letter-spacing:-.01em}
+.lede{font-size:20px;color:var(--ink-2);max-width:62ch;margin:0}
+nav.toc{position:sticky;top:24px;align-self:start;font-size:15px}
+@media (max-width:860px){nav.toc{position:static;margin-bottom:32px;padding:16px 18px;background:var(--paper);border:1px solid var(--line);border-radius:8px}}
+nav.toc p{margin:0 0 8px;font:600 12px/1 "Source Sans 3",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
+nav.toc ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+nav.toc a{text-decoration:none;color:var(--ink)}
+nav.toc a:hover{color:var(--green);text-decoration:underline}
+main{max-width:68ch}
+section{margin-bottom:56px}
+h2{font:700 30px/1.15 "Fraunces",Georgia,serif;margin:0 0 6px;text-wrap:balance}
+h3{font:600 19px/1.3 "Source Sans 3",sans-serif;margin:30px 0 8px}
+.where{font-size:15px;color:var(--ink-2);margin:0 0 18px}
+p{margin:0 0 14px}
+ul,ol{margin:0 0 14px;padding-left:22px}
+li{margin-bottom:6px}
+code,kbd{font:15px/1.4 "JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;background:var(--mono-bg);padding:1px 6px;border-radius:4px}
+pre{font:14px/1.5 "JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;background:var(--mono-bg);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;margin:0 0 16px}
+pre code{background:none;padding:0;font-size:inherit}
+.summary{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:22px 24px;box-shadow:var(--shadow)}
+.summary ul{margin-bottom:0}
+.steps{list-style:none;padding:0;margin:0;counter-reset:s}
+.steps li{position:relative;padding-left:52px;margin-bottom:18px;counter-increment:s}
+.steps li::before{content:counter(s);position:absolute;left:0;top:0;width:36px;height:36px;border-radius:50%;background:var(--green);color:#fff;font:700 17px/36px "Fraunces",serif;text-align:center}
+.steps strong{display:block;font-size:18px;margin-bottom:2px}
+.formula{font:600 18px/1.4 "JetBrains Mono",monospace;background:var(--green-soft);color:var(--ink);padding:14px 18px;border-radius:8px;margin:14px 0 18px;overflow-x:auto}
+.bons{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;margin:18px 0 8px}
+.bon{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:16px 18px;font-size:15px;font-variant-numeric:tabular-nums;box-shadow:var(--shadow)}
+.bon h4{margin:0 0 10px;font:600 13px/1 "Source Sans 3",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
+.bon table{width:100%;border-collapse:collapse}
+.bon td{padding:4px 0;border-bottom:1px dashed var(--line);vertical-align:top}
+.bon td:last-child{text-align:right;white-space:nowrap;font-family:"JetBrains Mono",monospace;font-size:14px}
+.bon tr.sum td{border-bottom:none;padding-top:10px;font-weight:600}
+.bon .verdict{margin:12px -18px -16px;padding:10px 18px;border-radius:0 0 6px 6px;font-weight:600}
+.bon .ok{background:var(--orange-soft);color:var(--orange)}
+.bon .no{background:var(--green-soft);color:var(--green)}
+.tablewrap{overflow-x:auto;margin:0 0 18px}
+table.grid{border-collapse:collapse;width:100%;font-size:15px;background:var(--paper);border:1px solid var(--line);font-variant-numeric:tabular-nums}
+table.grid th,table.grid td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.grid th{background:var(--sand);font-weight:600;font-size:14px}
+table.grid td:last-child.num,table.grid th.num,table.grid td.num{text-align:right;white-space:nowrap}
+.tag{display:inline-block;font:600 12px/1 "Source Sans 3",sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:5px 8px;border-radius:4px;background:var(--green-soft);color:var(--green);margin-right:4px;white-space:nowrap}
+.tag.o{background:var(--orange-soft);color:var(--orange)}
+.note{border-left:4px solid var(--orange);background:var(--orange-soft);padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0;font-size:16px}
+.note.g{border-color:var(--green);background:var(--green-soft)}
+.note p:last-child{margin-bottom:0}
+dl.faq dt{font-weight:600;margin-top:16px}
+dl.faq dd{margin:4px 0 0}
+footer{grid-column:1/-1;margin-top:24px;padding-top:20px;border-top:1px solid var(--line);font-size:14px;color:var(--ink-2)}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <p class="eyebrow">Scenery en Zo · verzending · handleiding</p>
+  <h1>Brievenbus of pakket: hoe de webshop dat nu beslist</h1>
+  <p class="lede">Sinds 22 september 2026 rekent de webshop bij elke bestelling zelf uit of alles in één A5-brievenbuspakket past. Dit document legt uit hoe die keuze tot stand komt, welke knoppen jij zelf kunt bedienen en waar die in Shopify zitten.</p>
+</header>
+
+<nav class="toc" aria-label="Inhoud">
+  <p>Inhoud</p>
+  <ol>
+    <li><a href="#kort">In het kort</a></li>
+    <li><a href="#werking">Hoe de keuze werkt</a></li>
+    <li><a href="#voorbeelden">Rekenvoorbeelden</a></li>
+    <li><a href="#aanpassen">Wat je kunt aanpassen</a></li>
+    <li><a href="#product">Per product</a></li>
+    <li><a href="#standaard">Standaardwaarden</a></li>
+    <li><a href="#tarieven">Tarieven en landen</a></li>
+    <li><a href="#gewicht">Gewichten</a></li>
+    <li><a href="#gratis">Gratis verzending</a></li>
+    <li><a href="#daarna">Na een wijziging</a></li>
+    <li><a href="#huidig">Huidige instellingen</a></li>
+    <li><a href="#faq">Valkuilen en vragen</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<section id="kort">
+  <h2>In het kort</h2>
+  <div class="summary">
+    <ul>
+      <li><strong>Elk product heeft een brievenbuscapaciteit:</strong> hoeveel stuks ervan passen in één A5-brievenbuspakket. Verf: 10, kwasten: 8, terrein: 1, en zo verder. <strong>0</strong> betekent: past nooit.</li>
+      <li><strong>Bij het afrekenen telt de webshop op</strong> hoeveel van het pakket elke regel in de winkelwagen gebruikt. Blijft dat samen op of onder 100%, dan is het een brievenbuspakket (€ 4,95). Anders een pakket.</li>
+      <li><strong>Brievenbuspakket alleen in Nederland.</strong> België, Duitsland en de rest van Europa krijgen altijd een pakkettarief.</li>
+      <li><strong>Gratis verzending vanaf € 100</strong> is een aparte automatische korting en geldt alleen voor Nederland.</li>
+      <li><strong>Alles is instelbaar zonder programmeur:</strong> per product op de productpagina, de standaarden per producttype onder Instellingen, en de tarieven ook daar.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="werking">
+  <h2>Hoe de keuze werkt</h2>
+  <p class="where">Dit gebeurt automatisch, in minder dan een seconde, telkens als een klant bij het afrekenen zijn adres invult.</p>
+  <ol class="steps">
+    <li><strong>Shopify vraagt om verzendopties</strong>Zodra de klant een adres heeft ingevuld stuurt Shopify de winkelwagen (welke producten, hoeveel, welk gewicht, welk land) naar onze eigen verzendmodule. Die draait bij Cloudflare en heet in Shopify "Scenery en Zo verzendregels".</li>
+    <li><strong>Elk product krijgt een capaciteit</strong>Voor elke regel in de winkelwagen zoekt de module op hoeveel stuks er in één A5-brievenbuspakket passen. Dat gaat in een vaste volgorde, de eerste treffer wint:
+      <ol>
+        <li>het veld <em>Brievenbus capaciteit</em> op de productpagina zelf</li>
+        <li>een regel voor de <em>collectie</em> waar het product in zit</li>
+        <li>een regel voor een <em>tag</em> van het product</li>
+        <li>een regel voor <em>leverancier + type</em> (bijvoorbeeld Reaper Miniatures + Miniature)</li>
+        <li>een regel voor het <em>producttype</em> (Paint, Brush, Terrain…)</li>
+        <li>de <em>standaard</em> voor alles wat nergens genoemd wordt (nu: 2)</li>
+      </ol>
+    </li>
+    <li><strong>De module telt op hoeveel pakket er gebruikt wordt</strong>Elke regel gebruikt <em>aantal ÷ capaciteit</em> van het pakket. Drie potjes verf met capaciteit 10 gebruiken 3/10, één kwast met capaciteit 8 gebruikt 1/8.
+      <div class="formula">past = (aantal₁ ÷ cap₁) + (aantal₂ ÷ cap₂) + … ≤ 1</div>
+    </li>
+    <li><strong>Vier extra controles</strong>Het wordt alsnog een pakket als één van deze waar is:
+      <ul>
+        <li>een product heeft capaciteit <strong>0</strong> (past nooit);</li>
+        <li>één los artikel weegt meer dan <strong>250 gram</strong>;</li>
+        <li>de hele bestelling weegt meer dan <strong>2000 gram</strong> (de PostNL-grens);</li>
+        <li>er zitten producten in met een <em>groep</em> (bijvoorbeeld "matten") samen met producten uit een andere groep of zonder groep. Producten met een groep mogen alleen met soortgenoten in één brievenbuspakket.</li>
+      </ul>
+    </li>
+    <li><strong>Het tarief wordt gekozen</strong>Past het en gaat het naar Nederland: de klant ziet alleen <em>Brievenbuspakket € 4,95</em>. Past het niet, of gaat het naar het buitenland: de klant ziet het pakkettarief van zijn land, gekozen op totaalgewicht (in Nederland tot 10 kg € 7,75, daarboven € 12,50).</li>
+  </ol>
+  <div class="note g"><p>De klant ziet dus nooit twee opties naast elkaar en betaalt nooit twee keer verzendkosten. Dat was het probleem met de oude twee verzendprofielen, en dat is hiermee verleden tijd.</p></div>
+</section>
+
+<section id="voorbeelden">
+  <h2>Rekenvoorbeelden</h2>
+  <p class="where">Drie winkelwagens, allemaal naar een Nederlands adres, met de huidige standaardwaarden.</p>
+  <div class="bons">
+    <div class="bon">
+      <h4>Winkelwagen A</h4>
+      <table>
+        <tr><td>4 × verf (cap 10)</td><td>4/10 = 0,40</td></tr>
+        <tr><td>1 × kwast (cap 8)</td><td>1/8 = 0,13</td></tr>
+        <tr><td>2 × Reaper mini, 20 g (cap 5)</td><td>2/5 = 0,40</td></tr>
+        <tr class="sum"><td>Gebruikt</td><td>0,93</td></tr>
+      </table>
+      <div class="verdict ok">Brievenbuspakket € 4,95</div>
+    </div>
+    <div class="bon">
+      <h4>Winkelwagen B</h4>
+      <table>
+        <tr><td>4 × verf (cap 10)</td><td>4/10 = 0,40</td></tr>
+        <tr><td>1 × terreinstuk (cap 1)</td><td>1/1 = 1,00</td></tr>
+        <tr class="sum"><td>Gebruikt</td><td>1,40</td></tr>
+      </table>
+      <div class="verdict no">Pakket € 7,75 (meer dan 1)</div>
+    </div>
+    <div class="bon">
+      <h4>Winkelwagen C</h4>
+      <table>
+        <tr><td>12 × verf (cap 10)</td><td>12/10 = 1,20</td></tr>
+        <tr class="sum"><td>Gebruikt</td><td>1,20</td></tr>
+      </table>
+      <div class="verdict no">Pakket € 7,75 (meer dan 1)</div>
+    </div>
+    <div class="bon">
+      <h4>Winkelwagen D</h4>
+      <table>
+        <tr><td>1 × Army Painter verf (cap 0)</td><td>past nooit</td></tr>
+        <tr><td>1 × kwast (cap 8)</td><td>1/8 = 0,13</td></tr>
+        <tr class="sum"><td>Gebruikt</td><td>—</td></tr>
+      </table>
+      <div class="verdict no">Pakket € 7,75 (product met 0)</div>
+    </div>
+    <div class="bon">
+      <h4>Winkelwagen E</h4>
+      <table>
+        <tr><td>1 × Reaper mini, 60 g (cap 2)</td><td>1/2 = 0,50</td></tr>
+        <tr><td>1 × Reaper mini, 120 g (cap 0)</td><td>past nooit</td></tr>
+        <tr class="sum"><td>Gebruikt</td><td>—</td></tr>
+      </table>
+      <div class="verdict no">Pakket € 7,75 (zware mini)</div>
+    </div>
+    <div class="bon">
+      <h4>Winkelwagen A naar België</h4>
+      <table>
+        <tr><td>zelfde inhoud als A</td><td>0,93</td></tr>
+        <tr><td>land: BE</td><td>geen brievenbus</td></tr>
+        <tr class="sum"><td>Gebruikt</td><td>0,93</td></tr>
+      </table>
+      <div class="verdict no">Pakket België € 9,95</div>
+    </div>
+  </div>
+</section>
+
+<section id="aanpassen">
+  <h2>Wat je kunt aanpassen</h2>
+  <p class="where">Vijf plekken, allemaal in de gewone Shopify-admin. Geen code, geen ontwikkelaar nodig.</p>
+  <div class="tablewrap">
+  <table class="grid">
+    <thead><tr><th>Wat</th><th>Waar in Shopify</th><th>Gebruik dit als…</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Capaciteit van één product</strong></td><td>Producten → productpagina → blok <em>Metavelden</em> → <em>Brievenbus capaciteit</em></td><td>…dit ene product afwijkt van zijn type (dikker doosje, extra klein, enzovoort).</td></tr>
+      <tr><td><strong>Groep van één product</strong></td><td>Zelfde blok → <em>Brievenbus groep</em></td><td>…een product wel in een brievenbuspakket past, maar alleen met soortgenoten (matten).</td></tr>
+      <tr><td><strong>Standaard per type, leverancier, collectie of tag</strong></td><td>Instellingen → Algemeen → onderaan <em>Shop-metavelden</em> → <em>Brievenbus capaciteit standaard</em></td><td>…je in één keer een hele groep producten wilt aanpassen, of de grenzen (250 g, 2000 g).</td></tr>
+      <tr><td><strong>Tarieven en landen</strong></td><td>Instellingen → Algemeen → <em>Shop-metavelden</em> → <em>Verzendtarieven</em></td><td>…PostNL de prijzen verhoogt, of een land bij een andere zone moet.</td></tr>
+      <tr><td><strong>Gewicht van een product</strong></td><td>Productpagina → blok <em>Verzending</em> → <em>Gewicht</em></td><td>…een product nog geen gewicht heeft (zie het Excel-bestand) of het klopt niet.</td></tr>
+      <tr><td><strong>Gratis verzending vanaf € 100</strong></td><td>Kortingen → <em>Gratis verzending vanaf €100</em></td><td>…je de drempel of de landen wilt veranderen.</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section id="product">
+  <h2>Per product</h2>
+  <p class="where">Producten → open het product → scrol naar het blok <em>Metavelden</em> (onderaan de pagina).</p>
+  <h3>Brievenbus capaciteit</h3>
+  <p>Een heel getal. Het aantal stuks van dít product dat in één A5-brievenbuspakket past. Vul je hier iets in, dan wint dat altijd van alle standaardregels.</p>
+  <ul>
+    <li><strong>Leeg</strong> = gebruik de standaard voor zijn collectie, tag, leverancier of type.</li>
+    <li><strong>0</strong> = past nooit in een brievenbuspakket. Dit staat nu op 1065 producten: alles wat vroeger in het profiel "General" zat en dus al als pakket verstuurd werd.</li>
+    <li><strong>1</strong> = het product vult in zijn eentje het hele pakket. Er kan dan niets meer bij.</li>
+    <li><strong>5</strong> = er passen er vijf; één stuk gebruikt dus 20% van het pakket.</li>
+  </ul>
+  <div class="note"><p>Twijfel je? Leg het product op een A5-vel (14,8 × 21 cm) en kijk hoeveel er naast elkaar passen bij een dikte van maximaal 3,2 cm. Rond naar beneden af. Een te hoog getal betekent dat een pakketje niet door de brievenbus past en PostNL het terugstuurt; een te laag getal betekent dat de klant onnodig € 7,75 betaalt.</p></div>
+  <h3>Brievenbus groep</h3>
+  <p>Een woord, bijvoorbeeld <code>matten</code>. Producten met een groep passen alleen samen met producten uit precies dezelfde groep in een brievenbuspakket. Zit er ook maar één ander product in de winkelwagen, dan wordt het een pakket. Laat het veld leeg voor alle gewone producten.</p>
+</section>
+
+<section id="standaard">
+  <h2>Standaardwaarden voor groepen producten</h2>
+  <p class="where">Instellingen → Algemeen → helemaal onderaan <em>Shop-metavelden</em> → klik in het veld <em>Brievenbus capaciteit standaard</em>. Klik op het vergrootpijltje rechtsboven in het veld voor een groter scherm en op <em>JSON opmaken</em> om de tekst netjes te laten inspringen. Sla op met de zwarte knop <em>Opslaan</em> bovenaan.</p>
+  <p>Dit veld is een tabel in JSON-vorm. Dat ziet er technisch uit, maar je hoeft alleen getallen te veranderen of een regel te kopiëren. Zo ziet het er nu uit:</p>
+<pre><code>{
+  "_uitleg": "…",
+  "letterbox_max_grams": 2000,
+  "item_max_grams": 250,
+  "default": 2,
+  "by_type": {
+    "Paint": 10,
+    "Brush": 8,
+    "Base": 4,
+    "Bases": 4,
+    "Material": 2,
+    "Terrain": 1,
+    "Tool": 1,
+    "Miniature": 5,
+    "Spons": 5
+  },
+  "by_vendor_type": {
+    "Reaper Miniatures|Miniature": { "weight_bands": [[30, 5], [85, 2]], "else": 0 },
+    "The Army Painter|Paint": 0
+  },
+  "by_collection": {},
+  "by_tag": {}
+}</code></pre>
+  <div class="tablewrap">
+  <table class="grid">
+    <thead><tr><th>Onderdeel</th><th>Betekenis</th></tr></thead>
+    <tbody>
+      <tr><td><code>letterbox_max_grams</code></td><td>Maximaal totaalgewicht van een brievenbuspakket in gram. PostNL staat 2 kg toe.</td></tr>
+      <tr><td><code>item_max_grams</code></td><td>Weegt één los artikel meer dan dit, dan is het altijd een pakket. Een zwaar ding is meestal ook een dik ding.</td></tr>
+      <tr><td><code>default</code></td><td>Capaciteit voor producten die nergens anders genoemd worden (ook producten zonder type).</td></tr>
+      <tr><td><code>by_type</code></td><td>Capaciteit per producttype. De naam moet precies gelijk zijn aan het veld <em>Producttype</em> op de productpagina, inclusief hoofdletters.</td></tr>
+      <tr><td><code>by_vendor_type</code></td><td>Capaciteit per combinatie leverancier + type, geschreven als <code>"Leverancier|Type"</code>. Wint van <code>by_type</code>.</td></tr>
+      <tr><td><code>by_collection</code></td><td>Capaciteit per collectie, op de <em>handle</em> van de collectie (het stukje uit de webadres-URL, bijvoorbeeld <code>draken</code>). Wint van leverancier en type.</td></tr>
+      <tr><td><code>by_tag</code></td><td>Capaciteit per producttag. Wint van leverancier en type, verliest van collectie.</td></tr>
+      <tr><td><code>weight_bands</code></td><td>Capaciteit afhankelijk van gewicht, van licht naar zwaar: <code>[[30, 5], [85, 2]]</code> betekent tot en met 30 g → 5 stuks, tot en met 85 g → 2 stuks, zwaarder → het getal bij <code>else</code>.</td></tr>
+      <tr><td><code>"groep"</code></td><td>In plaats van een getal mag een regel ook <code>{ "cap": 3, "groep": "matten" }</code> zijn. Dan krijgen alle producten die onder die regel vallen die groep.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <h3>Voorbeelden van aanpassingen</h3>
+  <p><strong>Kwasten: er passen er 6 in plaats van 8.</strong> Verander <code>"Brush": 8</code> in <code>"Brush": 6</code>.</p>
+  <p><strong>Alle draken nooit in een brievenbuspakket.</strong> Vul bij <code>by_collection</code> de handle van de collectie in:</p>
+<pre><code>"by_collection": { "draken": 0 },</code></pre>
+  <p><strong>Speelmatten: 3 per pakket, maar alleen met andere matten.</strong></p>
+<pre><code>"by_collection": { "draken": 0, "speelmatten": { "cap": 3, "groep": "matten" } },</code></pre>
+  <p><strong>Alles met de tag "groot" als pakket.</strong></p>
+<pre><code>"by_tag": { "groot": 0 },</code></pre>
+  <p><strong>Een nieuwe leverancier van verf in dikke flesjes.</strong></p>
+<pre><code>"by_vendor_type": {
+  "Reaper Miniatures|Miniature": { "weight_bands": [[30, 5], [85, 2]], "else": 0 },
+  "The Army Painter|Paint": 0,
+  "Vallejo|Paint": 6
+},</code></pre>
+  <div class="note"><p><strong>Spelregels van JSON.</strong> Namen en woorden tussen dubbele aanhalingstekens, getallen zonder aanhalingstekens, tussen elke regel een komma maar níét na de laatste regel van een blok. Klik na het bewerken op <em>JSON opmaken</em>: krijg je een foutmelding, dan ontbreekt er meestal een komma of een aanhalingsteken. Shopify laat je geen kapotte tekst opslaan, dus je kunt niets onherstelbaar stukmaken.</p></div>
+</section>
+
+<section id="tarieven">
+  <h2>Tarieven en landen</h2>
+  <p class="where">Instellingen → Algemeen → <em>Shop-metavelden</em> → <em>Verzendtarieven</em>. Bedragen in euro's, inclusief btw.</p>
+  <div class="tablewrap">
+  <table class="grid">
+    <thead><tr><th>Zone</th><th>Landen</th><th>Brievenbuspakket</th><th>Pakket</th><th class="num">Prijs</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="2">Nederland</td><td rowspan="2">NL</td><td rowspan="2">€ 4,95</td><td>Standaard Pakket Binnen Nederland, tot 10 kg</td><td class="num">€ 7,75</td></tr>
+      <tr><td>Pakket zwaar 10-23 kg</td><td class="num">€ 12,50</td></tr>
+      <tr><td>België</td><td>BE</td><td>—</td><td>Standaard Pakket Binnen Belgie, tot 10 kg</td><td class="num">€ 9,95</td></tr>
+      <tr><td>Duitsland</td><td>DE</td><td>—</td><td>Standardpaket, tot 10 kg</td><td class="num">€ 9,95</td></tr>
+      <tr><td rowspan="2">Europa</td><td rowspan="2">AT BG HR CZ DK EE FI FR GR HU IT LV LT LU NO PL PT RO SK SI ES SE CH</td><td rowspan="2">—</td><td>Package Up To 2kg</td><td class="num">€ 12,95</td></tr>
+      <tr><td>Package From 2kg - 5kg</td><td class="num">€ 17,50</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>In het veld staat dit als één zone per blok:</p>
+<pre><code>{
+  "countries": ["NL"],
+  "letterbox": 4.95,
+  "parcel": [
+    { "max_kg": 10, "price": 7.75, "name": "Standaard Pakket Binnen Nederland" },
+    { "max_kg": 23, "price": 12.5, "name": "Pakket zwaar 10-23 kg" }
+  ]
+}</code></pre>
+  <ul>
+    <li><strong>Prijs verhogen:</strong> verander het getal bij <code>price</code> of <code>letterbox</code>. Gebruik een punt als decimaalteken.</li>
+    <li><strong>Brievenbus in een land uitzetten:</strong> haal de regel <code>"letterbox": …</code> weg. Alleen zones mét die regel bieden een brievenbuspakket aan; nu is dat alleen Nederland.</li>
+    <li><strong>Gewichtsklassen:</strong> de eerste klasse waarvan <code>max_kg</code> groot genoeg is wint. Weegt de bestelling meer dan de zwaarste klasse, dan geldt die zwaarste klasse.</li>
+    <li><strong>Land toevoegen:</strong> zet de tweeletterige landcode in de lijst <code>countries</code> van de juiste zone. Een land dat in geen enkele zone staat krijgt <em>geen</em> verzendoptie en kan niet afrekenen. Het land moet daarnaast ook aanstaan onder Instellingen → Markten.</li>
+    <li><strong>De namen</strong> ("Standaard Pakket Binnen Nederland", enzovoort) zijn bewust dezelfde als vroeger, zodat de PostNL-app ze blijft herkennen. Alleen "Pakket zwaar 10-23 kg" is nieuw; controleer in de PostNL-app dat die aan een pakketdienst gekoppeld is.</li>
+  </ul>
+</section>
+
+<section id="gewicht">
+  <h2>Gewichten</h2>
+  <p class="where">Productpagina → blok <em>Verzending</em> → <em>Gewicht</em>. Vul het gewicht van één stuk in, inclusief verpakking.</p>
+  <p>Het gewicht doet twee dingen: het bepaalt of een los artikel te zwaar is voor de brievenbus (250 g), en het bepaalt de gewichtsklasse van een pakket. Voor Reaper-miniaturen bepaalt het bovendien de capaciteit (tot 30 g: 5 stuks, tot 85 g: 2 stuks, zwaarder: pakket).</p>
+  <p>Een product zonder gewicht telt als 0 gram. Het kan dan dus nooit "te zwaar" zijn en telt niet mee voor de 2 kg-grens. Voor verf en kwasten maakt dat weinig uit, voor terrein wel.</p>
+  <div class="note g"><p><strong>Bestand:</strong> <code>D:\Projects\verzendingen\producten_zonder_gewicht_2026-09-22.xlsx</code> bevat de 640 varianten die nu geen gewicht hebben (221 actief, 412 concept, 7 niet in lijst). Vul de gele kolom in en laat weten wanneer het klaar is; de gewichten worden dan in één keer in Shopify gezet. Rijen die je leeg laat worden overgeslagen.</p></div>
+</section>
+
+<section id="gratis">
+  <h2>Gratis verzending vanaf € 100</h2>
+  <p class="where">Kortingen → <em>Gratis verzending vanaf €100</em>. Dit is een automatische korting van Shopify zelf, los van de verzendmodule.</p>
+  <p>Bij een Nederlands adres en een winkelwagen van € 100 of meer streept Shopify de verzendkosten weg, of dat nu € 4,95 of € 7,75 is. De korting staat ingesteld op alleen Nederland. Op de website staat daarom overal "gratis verzending binnen Nederland vanaf € 100", ook op de Belgische, Duitse en Engelse versie.</p>
+</section>
+
+<section id="daarna">
+  <h2>Na een wijziging</h2>
+  <ul>
+    <li><strong>Standaarden en tarieven</strong> worden binnen 2 minuten opgepikt door de verzendmodule.</li>
+    <li><strong>Wijzigingen op een product</strong> (capaciteit, groep, gewicht, type, collectie, tag) kunnen tot 10 minuten duren. De module onthoudt productgegevens even om snel te blijven.</li>
+    <li><strong>Direct testen?</strong> Vraag Hylke om de "reset-link" te openen; dan vergeet de module alles meteen. Of wacht 10 minuten.</li>
+    <li><strong>Controleren:</strong> zet in de webshop een paar producten in de winkelwagen, ga naar afrekenen en vul een Nederlands adres in. Bij de verzendmethode zie je dan precies één optie. Je hoeft niets te betalen; sluit het tabblad daarna gewoon.</li>
+  </ul>
+</section>
+
+<section id="huidig">
+  <h2>Huidige instellingen</h2>
+  <p class="where">Stand van 22 september 2026.</p>
+  <div class="tablewrap">
+  <table class="grid">
+    <thead><tr><th>Producttype</th><th class="num">Producten</th><th class="num">Per A5-pakket</th><th>Opmerking</th></tr></thead>
+    <tbody>
+      <tr><td>Paint (verf)</td><td class="num">615</td><td class="num">10</td><td>The Army Painter: 0 (dikke flesjes). 131 producten staan per stuk op 0.</td></tr>
+      <tr><td>Brush (kwasten)</td><td class="num">95</td><td class="num">8</td><td>6 producten per stuk op 0.</td></tr>
+      <tr><td>Miniature</td><td class="num">2520</td><td class="num">5</td><td>Reaper: op gewicht (≤30 g: 5, ≤85 g: 2, zwaarder: 0). 510 producten per stuk op 0.</td></tr>
+      <tr><td>Base / Bases</td><td class="num">101</td><td class="num">4</td><td></td></tr>
+      <tr><td>Material</td><td class="num">322</td><td class="num">2</td><td>108 producten per stuk op 0.</td></tr>
+      <tr><td>Spons</td><td class="num">2</td><td class="num">5</td><td>Beide per stuk op 0.</td></tr>
+      <tr><td>Terrain</td><td class="num">537</td><td class="num">1</td><td>224 producten per stuk op 0.</td></tr>
+      <tr><td>Tool</td><td class="num">241</td><td class="num">1</td><td>84 producten per stuk op 0.</td></tr>
+      <tr><td>Bundle, geen type</td><td class="num">5</td><td class="num">2</td><td>Vallen onder de standaard. Zet ze zo nodig per product op 0.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Grenzen: 250 g per artikel, 2000 g per brievenbuspakket. Collectie- en tagregels: nog geen. Groepen: nog geen product heeft er een.</p>
+</section>
+
+<section id="faq">
+  <h2>Valkuilen en vragen</h2>
+  <dl class="faq">
+    <dt>Ik heb het type van een product veranderd, maar de keuze verandert niet.</dt>
+    <dd>Kijk of er op de productpagina een <em>Brievenbus capaciteit</em> is ingevuld; die wint altijd. Maak het veld leeg om weer de standaard te gebruiken. En wacht 10 minuten.</dd>
+    <dt>Een klant kreeg een brievenbuspakket aangeboden dat er niet in past.</dt>
+    <dd>Zet de capaciteit van het dikke product lager, of op 0. Weegt het meer dan 250 g, vul dan het gewicht in: dan is het automatisch een pakket.</dd>
+    <dt>Waarom staat "Miniature" op 5 terwijl Reaper anders werkt?</dt>
+    <dd>De regel voor "Reaper Miniatures|Miniature" wint van de typeregel. De 5 geldt voor miniaturen van andere leveranciers.</dd>
+    <dt>Kan ik een product aanbieden dat wél in de brievenbus past maar alleen alleen?</dt>
+    <dd>Ja: capaciteit 1. Dan is het pakket meteen vol en wordt alles wat erbij komt een pakket.</dd>
+    <dt>Waarom zie ik bij afrekenen helemaal geen verzendoptie?</dt>
+    <dd>Het land staat in geen enkele zone van <em>Verzendtarieven</em>, of het staat niet aan onder Instellingen → Markten. Of de tekst in een van beide velden is kapot. In dat geval: bewerken, <em>JSON opmaken</em> klikken en de foutmelding volgen.</dd>
+    <dt>Kan ik weer terug naar de oude situatie?</dt>
+    <dd>Ja. Onder Instellingen → Verzending en bezorging kun je in het profiel handmatige tarieven toevoegen naast of in plaats van "Scenery en Zo verzendregels". Overleg dat wel even, want dan komen de dubbele verzendkosten terug.</dd>
+    <dt>Wat kost dit?</dt>
+    <dd>De verzendmodule draait op het gratis Cloudflare-plan. De mogelijkheid om eigen tarieven te berekenen zit in het Grow-jaarabonnement van Shopify.</dd>
+  </dl>
+</section>
+
+</main>
+
+<footer>
+  Techniek, voor wie het wil weten: de module is een Cloudflare Worker (<code>sceneryenzo-verzendregels</code>), gekoppeld als carrier service via de Shopify-app "Product Brievenbuspakket". Broncode en tools: GitHub <code>scenery-en-zo/warforge-verzending</code>. De regels en tarieven staan níét in de code maar in de twee shop-metavelden hierboven.
+</footer>
+</div>
