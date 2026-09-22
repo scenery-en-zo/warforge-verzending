@@ -106,6 +106,7 @@ footer{grid-column:1/-1;margin-top:24px;padding-top:20px;border-top:1px solid va
     <li><a href="#product">Per product</a></li>
     <li><a href="#standaard">Standaardwaarden</a></li>
     <li><a href="#tarieven">Tarieven en landen</a></li>
+    <li><a href="#postnl">PostNL-app</a></li>
     <li><a href="#gewicht">Gewichten</a></li>
     <li><a href="#gratis">Gratis verzending</a></li>
     <li><a href="#daarna">Na een wijziging</a></li>
@@ -345,8 +346,30 @@ footer{grid-column:1/-1;margin-top:24px;padding-top:20px;border-top:1px solid va
     <li><strong>Brievenbus in een land uitzetten:</strong> haal de regel <code>"letterbox": …</code> weg. Alleen zones mét die regel bieden een brievenbuspakket aan; nu is dat alleen Nederland.</li>
     <li><strong>Gewichtsklassen:</strong> de eerste klasse waarvan <code>max_kg</code> groot genoeg is wint. Weegt de bestelling meer dan de zwaarste klasse, dan geldt die zwaarste klasse.</li>
     <li><strong>Land toevoegen:</strong> zet de tweeletterige landcode in de lijst <code>countries</code> van de juiste zone. Een land dat in geen enkele zone staat krijgt <em>geen</em> verzendoptie en kan niet afrekenen. Het land moet daarnaast ook aanstaan onder Instellingen → Markten.</li>
-    <li><strong>De namen</strong> ("Standaard Pakket Binnen Nederland", enzovoort) zijn bewust dezelfde als vroeger, zodat de PostNL-app ze blijft herkennen. Alleen "Pakket zwaar 10-23 kg" is nieuw; controleer in de PostNL-app dat die aan een pakketdienst gekoppeld is.</li>
+    <li><strong>De namen</strong> zijn belangrijk voor de PostNL-app, zie hieronder. Verander je een naam, of voeg je er een toe, dan moet die ook in de PostNL-app opnieuw gekoppeld worden.</li>
   </ul>
+</section>
+
+<section id="postnl">
+  <h2>De koppeling met de PostNL-app</h2>
+  <p class="where">PostNL-app → Instellingen → onderaan <em>Standaard exportinstellingen</em>.</p>
+  <p>De PostNL-app kan alleen vaste Shopify-tarieven aan een PostNL-product koppelen, geen tarieven van een verzendmodule. Daarom staat elk tarief van de module ook als <em>verborgen vast tarief</em> in het verzendprofiel: dezelfde naam en prijs, met de voorwaarde "vanaf 999 kg", zodat een klant het nooit te zien krijgt. De app herkent een bestelling aan de naam van de verzendmethode en gebruikt dan het PostNL-product dat jij aan dat verborgen tarief hebt gekoppeld.</p>
+  <div class="tablewrap">
+  <table class="grid">
+    <thead><tr><th>Zone</th><th>Naam in de PostNL-app</th><th>Koppelen aan</th></tr></thead>
+    <tbody>
+      <tr><td>Nederland</td><td>Brievenbuspakket</td><td>Standaard bezorging Nederland, pakkettype brievenbuspakje</td></tr>
+      <tr><td>Nederland</td><td>Standaard Pakket Binnen Nederland</td><td>Standaard bezorging Nederland, pakket</td></tr>
+      <tr><td>Nederland</td><td>Pakket zwaar 10-23 kg</td><td>Standaard bezorging Nederland, pakket</td></tr>
+      <tr><td>België</td><td>Standaard Pakket Binnen Belgie</td><td>Standaard bezorging België (vanuit Nederland)</td></tr>
+      <tr><td>Duitsland</td><td>Standardpaket</td><td>Bezorging binnen EU</td></tr>
+      <tr><td>Europa</td><td>Package Up To 2kg</td><td>Bezorging binnen EU (Zwitserland en Noorwegen: buiten EU)</td></tr>
+      <tr><td>Europa</td><td>Package From 2kg - 5kg</td><td>Bezorging binnen EU (Zwitserland en Noorwegen: buiten EU)</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="note"><p><strong>Nieuw tarief of andere naam?</strong> Pas dan drie dingen aan: de naam in <em>Verzendtarieven</em>, het verborgen tarief in het verzendprofiel (vraag Hylke, dat gaat met een script) en de koppeling in de PostNL-app. Een bestelling met een naam die de app niet kent krijgt "Standaard zending + retour bij geen gehoor" en de melding "Verzendmethode werd niet herkend"; je kunt hem dan nog handmatig exporteren op de detailpagina van de bestelling in de app.</p></div>
+  <p>Het lege gewicht van de verpakkingen staat onder Instellingen → Verzending en bezorging → Pakketten: 0,25 kg voor het standaardpakket en 0,05 kg voor het brievenbuspakje. Shopify telt dit op bij het artikelgewicht en geeft het totaal door aan de PostNL-app.</p>
 </section>
 
 <section id="gewicht">

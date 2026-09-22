@@ -55,6 +55,22 @@ Example rule entries:
 "by_tag": { "groot": 0 }
 ```
 
+## PostNL app (labels)
+
+The PostNL app only lists Shopify's *fixed* rates under "Standaard exportinstellingen", never
+carrier-calculated ones. So every carrier rate name also exists as a hidden fixed rate in the
+General profile (same name and price, condition "weight >= 999 kg", so it never shows at
+checkout). The app matches incoming orders on the shipping-line name/code, which the Worker
+sets to the same text. The shop owner links each hidden rate to a PostNL product in the app.
+
+Rule: when a rate name is added or changed in `custom.verzendtarieven`, add the hidden rate
+too and link it in the PostNL app:
+
+```bash
+python tools/inactive_rates.py addhidden "Nederland" "Naam van het tarief" 7.75
+python tools/inactive_rates.py show
+```
+
 ## Deploy
 
 ```bash
