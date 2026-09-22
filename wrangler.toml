@@ -1,0 +1,14 @@
+name = "sceneryenzo-verzendregels"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+
+[vars]
+CARRIER_SHOP = "scenery-en-zo.myshopify.com"
+
+# Secrets (never in this file), set once with:
+#   npx wrangler secret put CARRIER_CLIENT_ID
+#   npx wrangler secret put CARRIER_CLIENT_SECRET
+# Values: the client id / secret of the Dev Dashboard app "Product Brievenbuspakket".
+
+[observability]
+enabled = true

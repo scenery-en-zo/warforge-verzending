@@ -1,0 +1,20 @@
+{
+  "name": "warforge-verzending",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Scenery en Zo verzendregels: Shopify carrier service (brievenbuspakket vs pakket) on Cloudflare Workers",
+  "type": "module",
+  "scripts": {
+    "check": "tsx src/letterbox.check.ts && tsc --noEmit",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260921.1",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "wrangler": "^4.0.0",
+    "@types/node": "^22.0.0"
+  }
+}
