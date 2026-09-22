@@ -6,5 +6,5 @@ tok=b.get_access_token(); H={"X-Shopify-Access-Token":tok,"Content-Type":"applic
 def gql(q,v=None): return requests.post(f"https://{b.SHOPIFY_STORE}/admin/api/2026-01/graphql.json",headers=H,json={"query":q,"variables":v or {}}).json()
 sid=gql("{ shop { id } }")["data"]["shop"]["id"]
 M="""mutation($m:[MetafieldsSetInput!]!){ metafieldsSet(metafields:$m){ metafields{ id key } userErrors{ field message } } }"""
-r=gql(M,{"m":[{"ownerId":sid,"namespace":"custom","key":"brievenbus_capaciteit_standaard","type":"json","value":open(__import__("os").path.join(__import__("os").path.dirname(__file__),"defaults.json")).read()}]})
+r=gql(M,{"m":[{"ownerId":sid,"namespace":"custom","key":"brievenbus_capaciteit_standaard","type":"json","value":open(__import__("os").path.join(__import__("os").path.dirname(__file__),"defaults.json"),encoding="utf-8").read()}]})
 print(r.get("data") or r)
