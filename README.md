@@ -131,6 +131,19 @@ read_markets/write_markets for `verzending_markten.py`). That app also owns the 
 registration in Shopify (`carrierServiceCreate` with callback `https://<worker>/rates`).
 The Worker talks Admin API 2026-10, dimensions on `DIMENSIONS_API_VERSION` (2027-01).
 
+## Test locally
+
+Read-only against the live shop: the Worker and the script only read products and settings.
+
+```bash
+# .dev.vars (git-ignored): CARRIER_CLIENT_ID=… and CARRIER_CLIENT_SECRET=… from the verzendingen .env
+npx wrangler dev --port 8787        # on NixOS prefix NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
+python tools/testkarren.py          # signed test carts; add --product <id> for a product with dimensions
+```
+
+`testkarren.py` also takes the live Worker URL. The Worker log (`[carrier] … lines: 1x cap 0 (afmetingen)`)
+shows where each capacity came from.
+
 ## Endpoints
 
 - `POST /rates` Shopify carrier callback (HMAC verified with the client secret)

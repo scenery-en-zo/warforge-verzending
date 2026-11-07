@@ -24,6 +24,7 @@ Needs the scopes read_markets + write_markets on the "Product Brievenbuspakket" 
 import sys, json
 from shipauth import gql, market_driven
 
+CARRIER_NAME = "Scenery en Zo verzendregels"  # other carriers (e.g. PostNL afhaalpunten) may sit next to it
 CURRENCY = "EUR"  # the carrier answers in EUR; every market of this shop sells in EUR
 HIDDEN_FROM_KG = 999
 
@@ -119,8 +120,8 @@ if cmd == "status":
             print("    VERZENDING UIT voor deze markt")
         for o in opts:
             print("   ", label(o), "|", KIND.get(o["__typename"], o["__typename"]), "|", "actief" if o["isActive"] else "INACTIEF")
-        if not any(o["__typename"] == "DeliveryCarrierCalculatedOptionDefinition" for o in opts):
-            print("    let op: geen verzendmodule-tarief in deze markt")
+        if not any(o["__typename"] == "DeliveryCarrierCalculatedOptionDefinition" and CARRIER_NAME in label(o) for o in opts):
+            print(f"    let op: '{CARRIER_NAME}' staat niet in deze markt")
 
 elif cmd == "carrier":
     require_market_driven()
