@@ -6,9 +6,14 @@ An inactive rate is never offered at checkout; it only exists so the PostNL app 
   python tools/inactive_rates.py show
   python tools/inactive_rates.py add "Nederland" "Brievenbuspakket" 4.95
   python tools/inactive_rates.py remove "Nederland" "Brievenbuspakket"
+
+Legacy model only: on market-driven shipping use `verzending_markten.py addhidden <markt> <naam> <prijs>`.
 """
 import sys, json
-from shipauth import gql
+from shipauth import gql, market_driven, LEGACY_STOP
+
+if market_driven():
+    sys.exit(LEGACY_STOP)
 
 GEN = "gid://shopify/DeliveryProfile/141336838474"
 LG = "gid://shopify/DeliveryLocationGroup/143336964426"

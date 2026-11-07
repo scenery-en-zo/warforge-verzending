@@ -1,6 +1,6 @@
-/* Run with: npx tsx app/services/shipping/letterbox.check.ts */
+/* Run with: npx tsx src/letterbox.check.ts  (part of npm run check) */
 import assert from "node:assert/strict";
-import { cartFitsLetterbox, ratesFor, resolveCapacity, type ProductInfo, type RatesConfig, type Rules } from "./letterbox";
+import { capacityFromDims, cartFitsLetterbox, piecesInBox, ratesFor, resolveCapacity, type Dims, type ProductInfo, type RatesConfig, type Rules } from "./letterbox";
 
 const rules: Rules = {
   letterbox_max_grams: 2000,
@@ -40,6 +40,40 @@ assert.equal(fit([[1, 100, mat], [1, 16, mini]]).fits, false, "mat may not mix w
 assert.equal(fit([[20, 110, P({ capacityOverride: 100 })]]).fits, false, "2.2 kg total is too heavy");
 assert.equal(fit([[1, 300, P({ capacityOverride: 2 })]]).fits, false, "single item over 250 g");
 assert.equal(fit([]).fits, false, "empty cart never letterbox");
+
+// dimensions (default box A5 21 x 14.8 x 3.2 cm)
+const A5: number[] = [21, 14.8, 3.2];
+const D = (length: number, width: number, height: number): Dims => ({ length, width, height });
+const flat = D(10, 7, 1.5);
+assert.equal(piecesInBox(flat, A5), 8, "2 x 2 x 2 in the best orientation");
+assert.equal(piecesInBox(D(1.5, 10, 7), A5), 8, "order of the sizes does not matter");
+assert.equal(piecesInBox(D(10.5, 7.4, 1.6), A5), 8, "exact fits survive floating point (14.8 / 7.4)");
+assert.equal(piecesInBox(D(21, 14.8, 3.2), A5), 1, "an A5-sized piece fills the box");
+assert.equal(piecesInBox(D(5, 5, 4), A5), 0, "thicker than 3.2 cm every way round");
+assert.equal(piecesInBox(D(25, 2, 2), A5), 0, "longer than the box");
+assert.equal(piecesInBox(D(10, 7, 0), A5), 0, "incomplete dimensions never fit by size");
+assert.equal(piecesInBox(flat, [30, 20, 3]), 16, "box size is configurable (7 along 30, 10 along 20)");
+assert.deepEqual(capacityFromDims(flat, 300, rules), { capacity: 6, bySize: 8, byWeight: 6 }, "weight caps the count: 2000 / 300");
+assert.deepEqual(capacityFromDims(flat, 0, rules), { capacity: 8, bySize: 8, byWeight: null }, "no weight, size decides");
+
+const parcelOnly = P({ productType: "Terrain", capacityOverride: 0 });
+assert.deepEqual(resolveCapacity(parcelOnly, 50, rules, flat), { capacity: 8, group: null, source: "afmetingen" }, "dimensions beat the product field");
+assert.equal(resolveCapacity(P({ tags: ["geen-brievenbus"] }), 50, rules, flat).capacity, 0, "never-tag beats dimensions");
+assert.equal(resolveCapacity(P({ tags: ["nooit"] }), 50, { ...rules, never_tag: "nooit" }, flat).capacity, 0, "never-tag is configurable");
+assert.equal(resolveCapacity(mat, 100, rules, flat).group, "matten", "group still comes from the rules");
+assert.equal(resolveCapacity(P({ capacityOverride: 2, tags: ["groot"] }), 50, { ...rules, by_tag: { groot: { cap: 0, groep: "groot" } } }).group, "groot", "product field keeps a group from any rule");
+assert.equal(resolveCapacity(parcelOnly, 50, rules, D(10, 7, 0)).source, "product", "incomplete dimensions fall back to the rules");
+assert.equal(resolveCapacity(null, 50, rules, flat).capacity, 0, "unknown product stays parcel-only");
+
+const fitD = (lines: Array<[number, number, ProductInfo, Dims | null]>) => cartFitsLetterbox(lines.map(([quantity, grams, product, dims]) => ({ quantity, grams, product, dims })), rules);
+assert.equal(fitD([[8, 50, parcelOnly, flat]]).fits, true, "eight flat pieces fit");
+assert.equal(fitD([[9, 50, parcelOnly, flat]]).fits, false, "nine do not");
+assert.equal(fitD([[1, 300, parcelOnly, flat]]).fits, true, "a 300 g piece with dimensions skips the 250 g stand-in");
+assert.equal(fitD([[1, 300, P({ capacityOverride: 2 }), null]]).fits, false, "without dimensions the 250 g limit still applies");
+assert.equal(fitD([[4, 50, parcelOnly, flat], [5, 27, paint, null]]).fits, true, "4/8 + 5/10 mixes with rule-based lines");
+assert.equal(fitD([[1, 50, parcelOnly, D(5, 5, 4)]]).fits, false, "too thick");
+assert.equal(fitD([[7, 300, parcelOnly, flat]]).fits, false, "2.1 kg total is too heavy");
+assert.deepEqual(fitD([[2, 50, parcelOnly, flat]]).lines, ["2x cap 8 (afmetingen)"], "log line per cart line");
 
 // rates
 const cfg: RatesConfig = { currency: "EUR", zones: [

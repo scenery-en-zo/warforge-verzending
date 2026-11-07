@@ -1,5 +1,5 @@
 import { cartFitsLetterbox, ratesFor, type Line } from "./letterbox";
-import { clearCaches, loadProducts, loadRules, type Env } from "./catalog";
+import { clearCaches, loadDimensions, loadProducts, loadRules, type Env } from "./catalog";
 
 /**
  * Scenery en Zo verzendregels: Shopify CarrierService callback on Cloudflare Workers.
@@ -11,9 +11,13 @@ import { clearCaches, loadProducts, loadRules, type Env } from "./catalog";
  * NL and the cart fits ONE A5 brievenbuspakket -> only "Brievenbuspakket".
  * Otherwise the weight-band parcel rate of the destination zone. Free shipping
  * above the threshold is Shopify's automatic discount, not ours.
+ *
+ * The callback is the same under Shopify's market-driven shipping: there the
+ * carrier is a "carrier-calculated" shipping option inside each market instead
+ * of a rate in a delivery profile zone (see tools/verzending_markten.py).
  */
 
-type CarrierItem = { name?: string; sku?: string; quantity: number; grams: number; product_id?: number | string; requires_shipping?: boolean };
+type CarrierItem = { name?: string; sku?: string; quantity: number; grams: number; product_id?: number | string; variant_id?: number | string; requires_shipping?: boolean };
 type CarrierRequest = { rate?: { destination?: { country?: string }; items?: CarrierItem[]; currency?: string } };
 
 const json = (body: unknown, status = 200) =>
@@ -66,17 +70,19 @@ export default {
       return json({ rates: [] });
     }
     const ids = items.map((i) => String(i.product_id ?? "")).filter(Boolean);
-    const infos = await loadProducts(env, ids);
+    const variantIds = items.map((i) => String(i.variant_id ?? "")).filter(Boolean);
+    const [infos, dims] = await Promise.all([loadProducts(env, ids), loadDimensions(env, variantIds)]);
     const lines: Line[] = items.map((i) => ({
       quantity: i.quantity,
       grams: Number(i.grams) || 0,
       product: infos.get(String(i.product_id ?? "")) ?? null,
+      dims: dims.get(String(i.variant_id ?? "")) ?? null,
     }));
 
     const fit = cartFitsLetterbox(lines, rules);
     const letterboxAllowed = country === "NL" && fit.fits;
     const out = ratesFor(country, fit.totalGrams, letterboxAllowed, rates);
-    console.log(`[carrier] ${country} items=${items.length} grams=${fit.totalGrams} used=${fit.used.toFixed(2)} fits=${fit.fits} -> ${out.map((r) => r.service_code).join(",") || "none"} (${Date.now() - started} ms)${fit.reasons.length ? " reasons: " + fit.reasons.join("; ") : ""}`);
+    console.log(`[carrier] ${country} items=${items.length} grams=${fit.totalGrams} used=${fit.used.toFixed(2)} fits=${fit.fits} -> ${out.map((r) => r.service_code).join(",") || "none"} (${Date.now() - started} ms) lines: ${fit.lines.join(", ")}${fit.reasons.length ? " reasons: " + fit.reasons.join("; ") : ""}`);
     return json({ rates: out });
   },
 } satisfies ExportedHandler<Env>;

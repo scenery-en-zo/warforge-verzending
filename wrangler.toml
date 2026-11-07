@@ -4,6 +4,9 @@ compatibility_date = "2026-09-01"
 
 [vars]
 CARRIER_SHOP = "scenery-en-zo.myshopify.com"
+# Admin API version for the packed dimensions (product > Shipping > length/width/height).
+# 2027-01 is the first version with the field; it is a release candidate until 2027-01-01.
+DIMENSIONS_API_VERSION = "2027-01"
 
 # Secrets (never in this file), set once with:
 #   npx wrangler secret put CARRIER_CLIENT_ID

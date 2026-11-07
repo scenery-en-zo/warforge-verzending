@@ -5,9 +5,14 @@
   python profiles_carrier.py 2                      -> move every variant of Kleine Artikelen to General
   python profiles_carrier.py 3                      -> remove the empty Kleine Artikelen profile
   python profiles_carrier.py show                   -> print the current state
+
+Legacy model only: a shop on market-driven shipping keeps its rates per market, see verzending_markten.py.
 """
 import sys, json, time
-from shipauth import gql
+from shipauth import gql, market_driven, LEGACY_STOP
+
+if market_driven():
+    sys.exit(LEGACY_STOP)
 
 GEN = "gid://shopify/DeliveryProfile/141336838474"
 KLEIN = "gid://shopify/DeliveryProfile/142752514378"
