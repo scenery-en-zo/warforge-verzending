@@ -13,7 +13,8 @@ export: sheets with yellow columns to fill in (length, width, height in cm, weig
                               whose weight does not fit (check those first). Add your own title texts
                               in the empty rows. A new product whose title contains the text is covered
                               automatically.
-          Losse producten     unmeasured light products in no group: a worklist (not imported).
+          Losse producten     unmeasured light products in no group, one row per variant: fill in the
+                              size and/or weight of that product itself.
           Soorten             one row per supplier + product type, for kinds whose products all ship
                               in the same packaging (see the weight range).
           Maatklassen         size classes per product tag (maat-klein, maat-plat, ...), for products
@@ -24,6 +25,9 @@ import: writes every row with length, width and height into the shop field
         by_vendor_type or by_tag. An old capacity number for that key is replaced; a "groep" is kept.
         Empty rows are skipped; nothing is ever deleted. --dry shows the changes without writing.
         It refuses when the field was changed in the admin after it was read (compareDigest).
+        Losse producten rows are written onto the variant itself (product > Shipping: packed dimensions
+        and weight, Admin API 2027-01); a row needs all three sizes, or only a weight. Needs the app
+        scope write_products.
 
 Read-only except `import` without --dry, which only the shop owner runs.
 """
@@ -100,19 +104,21 @@ def load_products():
     Q = """query($c:String){ products(first:100, after:$c){ pageInfo{ hasNextPage endCursor } nodes{
       id legacyResourceId title productType vendor status tags
       cap: metafield(namespace:"custom",key:"brievenbus_capaciteit"){ value }
-      variants(first:50){ nodes{ inventoryItem{ measurement{ weight{ value unit } } } } } } } }"""
+      variants(first:50){ nodes{ id title inventoryItem{ measurement{ weight{ value unit } } } } } } } }"""
     out, c = [], None
     while True:
         d = gql(Q, {"c": c})["data"]["products"]
         for p in d["nodes"]:
             if p["status"] == "ARCHIVED":
                 continue
-            ws = []
+            ws, vs = [], []
             for v in p["variants"]["nodes"]:
                 w = v["inventoryItem"]["measurement"].get("weight") or {}
-                ws.append((w.get("value") or 0) * TO_G.get(w.get("unit"), 1))
+                g = (w.get("value") or 0) * TO_G.get(w.get("unit"), 1)
+                ws.append(g)
+                vs.append({"id": v["id"], "title": "" if v["title"] == "Default Title" else v["title"], "grams": g})
             out.append({"id": p["id"], "title": p["title"], "vendor": p["vendor"] or "", "type": p["productType"] or "", "tags": p["tags"],
-                        "active": p["status"] == "ACTIVE", "variants": len(ws), "weights": [g for g in ws if g > 0],
+                        "active": p["status"] == "ACTIVE", "variants": len(ws), "weights": [g for g in ws if g > 0], "vars": vs,
                         "has_cap": p["cap"] is not None, "sold": 0,
                         "link": f"https://admin.shopify.com/store/{STORE.split('.')[0]}/products/{p['legacyResourceId']}"})
         if not d["pageInfo"]["hasNextPage"]:
@@ -257,17 +263,21 @@ def export(out):
     style(vg, [30, 22, 10, 12, 12, 10, 56, 40, 28, 20, 10, 10, 10, 10], [0, 10, 11, 12, 13], link_col=8)
     vg.auto_filter.ref = vg.dimensions
 
-    # Losse producten: unmeasured light products in no group, best sellers first. A worklist, not imported:
-    # measure the top ones on the product page, or give them a size-class tag.
+    # Losse producten: unmeasured light products in no group, best sellers first, one row per variant.
+    # The import writes the filled-in size and weight onto the variant itself (product > Shipping).
     grouped = {id(p) for ps in members.values() for p in ps}
     singles = sorted((p for p in open_light if id(p) not in grouped),
                      key=lambda p: (-p["sold"], not p["weights"], p["type"], p["vendor"], p["title"]))
     lp = wb.create_sheet("Losse producten")
-    lp.append(["Product", "Leverancier", "Type", "Gewicht (g)", sold_col, "Admin link"])
+    lp.append(["Product", "Variant", "Leverancier", "Type", "Gewicht nu (g)", sold_col, "Admin link",
+               *SIZE, "Variant GID", "Product GID"])
     for p in singles:
-        lp.append([p["title"], p["vendor"], p["type"], round(p["weights"][0], 1) if p["weights"] else "geen gewicht",
-                   p["sold"] if sales is not None else "", p["link"]])
-    style(lp, [56, 24, 14, 12, 14, 60], [], link_col=5)
+        for v in p["vars"]:
+            lp.append([p["title"], v["title"], p["vendor"], p["type"], round(v["grams"], 1) if v["grams"] else "geen gewicht",
+                       p["sold"] if sales is not None else "", p["link"], "", "", "", "", v["id"], p["id"]])
+    style(lp, [50, 16, 22, 12, 12, 14, 30, 10, 10, 10, 10, 30, 30], [7, 8, 9, 10], link_col=6)
+    lp.column_dimensions["L"].hidden = True
+    lp.column_dimensions["M"].hidden = True
     lp.auto_filter.ref = lp.dimensions
 
     # Soorten: supplier + product type.
@@ -312,8 +322,10 @@ def export(out):
         "    Kijk of ze echt in dezelfde verpakking gaan voordat je een maat invult; zo niet, laat de rij leeg.",
         "  Kijk ook naar 'Afwijkende producten': meestal een verkeerd ingevuld gewicht, soms een ander product (een set).",
         "  Eigen groep? Vul in een lege rij een stukje titel in dat alleen die producten hebben, plus de maat.",
-        f"Losse producten: lichte producten (tot {LIGHT} g) zonder maat en zonder groep, bestverkochte eerst. Dit tabblad wordt niet",
-        "  ingelezen: meet de bovenste en vul de maat in op de productpagina, of geef ze een maatklasse-tag (zie Maatklassen).",
+        f"Losse producten: lichte producten (tot {LIGHT} g) zonder maat en zonder groep, een rij per variant, bestverkochte eerst.",
+        "  Vul de maat (alle drie) en/of het gewicht van DAT product in; bij het inlezen komt het op de productpagina te staan.",
+        "  Alleen een gewicht mag ook (voor producten zonder gewicht). Of geef ze in Shopify een maatklasse-tag (zie Maatklassen).",
+        "  De verborgen kolommen L en M zijn nodig voor het inlezen; niet verwijderen.",
         "  Zwaardere producten staan er niet in: die gaan als pakket, en dat is meestal goed.",
         "Soorten: leverancier + type. Alleen invullen als alle producten van die soort dezelfde verpakking hebben (zie Gewicht min-max).",
         "Maatklassen: verzin een tag (bijv. maat-klein), vul de maat in, en geef producten die tag in Shopify:",
@@ -359,8 +371,66 @@ def read_sheet(ws, key_col):
     return out
 
 
+VARIANTS = """mutation($pid:ID!,$v:[ProductVariantsBulkInput!]!){
+  productVariantsBulkUpdate(productId:$pid, variants:$v){ userErrors{ field message } } }"""
+
+
+def import_variants(wb, dry):
+    """Losse producten: write the filled-in size (packedDimensions, Admin API 2027-01) and weight onto
+    each variant. A row needs all three sizes, or only a weight; anything else is skipped."""
+    if "Losse producten" not in wb.sheetnames:
+        return
+    ws = wb["Losse producten"]
+    head = [c.value for c in ws[1]]
+    col = {h: i for i, h in enumerate(head)}
+    per_product = defaultdict(list)
+    for row in ws.iter_rows(min_row=2, values_only=True):
+        vid, pid = row[col["Variant GID"]], row[col["Product GID"]]
+        if not vid or not pid:
+            continue
+        l, b, h, g = (number(row[col[s]]) for s in SIZE)
+        m = {}
+        if l and b and h:
+            m["packedDimensions"] = {"length": l, "width": b, "height": h, "unit": "CENTIMETERS"}
+        elif any((l, b, h)):
+            print("maat overgeslagen (niet alle drie de maten):", row[col["Product"]], row[col["Variant"]] or "")
+        if g:
+            m["weight"] = {"value": g, "unit": "GRAMS"}
+        if m:
+            per_product[pid].append({"id": vid, "inventoryItem": {"measurement": m}, "_name": row[col["Product"]]})
+    n = sum(len(v) for v in per_product.values())
+    if not n:
+        print("losse producten: niets ingevuld")
+        return
+    for vs in list(per_product.values())[:5]:
+        for v in vs:
+            mm = v["inventoryItem"]["measurement"]
+            size = " x ".join(f"{mm['packedDimensions'][k]:g}" for k in ("length", "width", "height")) + " cm" if "packedDimensions" in mm else ""
+            print(f"  {v['_name'][:50]}: {size}{', ' if size and 'weight' in mm else ''}{(str(mm['weight']['value']) + ' g') if 'weight' in mm else ''}")
+    if dry:
+        print(f"[dry] losse producten: {n} varianten van {len(per_product)} producten, niets geschreven")
+        return
+    ok = err = 0
+    for pid, vs in per_product.items():
+        r = gql(VARIANTS, {"pid": pid, "v": [{k: x for k, x in v.items() if k != "_name"} for v in vs]}, version="2027-01")
+        e = ((r.get("data") or {}).get("productVariantsBulkUpdate") or {}).get("userErrors") or r.get("errors")
+        if e:
+            err += len(vs)
+            print("fout", vs[0]["_name"], e)
+            if "access" in json.dumps(e).lower():
+                sys.exit("De app mag geen producten wijzigen: zet het recht write_products in een nieuwe app-versie.")
+        else:
+            ok += len(vs)
+    print(f"losse producten: {ok} varianten bijgewerkt, {err} fouten")
+
+
 def do_import(path, dry):
     wb = load_workbook(path, data_only=True)
+    import_rules(wb, dry)
+    import_variants(wb, dry)
+
+
+def import_rules(wb, dry):
     sheets = {"by_title": ("Verpakkingsgroepen", "Titel bevat"), "by_vendor_type": ("Soorten", "Sleutel"), "by_tag": ("Maatklassen", "Tag")}
     plan = {table: read_sheet(wb[name], key) for table, (name, key) in sheets.items() if name in wb.sheetnames}
     shop_id, rules, digest = read_field()
@@ -377,10 +447,10 @@ def do_import(path, dry):
                 changes += 1
                 print(f"{table}[{key}]: {describe(old) or 'niets'} -> {describe(entry)}")
     if not changes:
-        print("niets te veranderen")
+        print("groepen: niets te veranderen")
         return
     if dry:
-        print(f"[dry] {changes} wijzigingen, niets geschreven")
+        print(f"[dry] groepen: {changes} wijzigingen, niets geschreven")
         return
     m = {"ownerId": shop_id, "namespace": "custom", "key": "brievenbus_capaciteit_standaard", "type": "json",
          "value": json.dumps(new, ensure_ascii=False, indent=2)}
@@ -388,7 +458,7 @@ def do_import(path, dry):
         m["compareDigest"] = digest
     r = gql(SET, {"m": [m]})
     errs = ((r.get("data") or {}).get("metafieldsSet") or {}).get("userErrors") or r.get("errors")
-    print("fout:", errs) if errs else print(f"{changes} wijzigingen geschreven; de verzendmodule gebruikt ze binnen 2 minuten")
+    print("fout:", errs) if errs else print(f"groepen: {changes} wijzigingen geschreven; de verzendmodule gebruikt ze binnen 2 minuten")
 
 
 args = [a for a in sys.argv[1:] if a != "--dry"]
