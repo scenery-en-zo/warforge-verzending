@@ -2,14 +2,14 @@
 
   python tools/gewichten_export.py [uitvoer.xlsx]
 
-Default output: D:/Projects/verzendingen/producten_zonder_gewicht_<datum>.xlsx
+Default output: producten_zonder_gewicht_<datum>.xlsx in the verzendingen folder (next to .env)
 Fill in column "Gewicht (gram)" and apply with tools/gewichten_import.py.
 """
 import sys, os, datetime
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
 from openpyxl.utils import get_column_letter
-from shipauth import gql, STORE
+from shipauth import gql, STORE, OUT_DIR
 
 Q = """query($c:String){ products(first:100, after:$c){ pageInfo{ hasNextPage endCursor } nodes{
   id legacyResourceId title handle productType vendor status
@@ -36,7 +36,7 @@ while True:
     c = d["pageInfo"]["endCursor"]
 
 rows.sort(key=lambda r: (r[5] != "actief", r[5] == "gearchiveerd", r[3], r[4], r[0], r[1]))
-out = sys.argv[1] if len(sys.argv) > 1 else f"D:/Projects/verzendingen/producten_zonder_gewicht_{datetime.date.today():%Y-%m-%d}.xlsx"
+out = sys.argv[1] if len(sys.argv) > 1 else os.path.join(OUT_DIR, f"producten_zonder_gewicht_{datetime.date.today():%Y-%m-%d}.xlsx")
 
 wb = Workbook()
 ws = wb.active

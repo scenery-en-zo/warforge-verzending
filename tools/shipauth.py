@@ -4,6 +4,7 @@ ENV_FILE=next((p for p in (os.environ.get("VERZENDINGEN_ENV"),'D:/Projects/verze
                           os.path.expanduser('~/Projects/verzendingen/.env')) if p and os.path.exists(p)),None)
 if not ENV_FILE:
     raise SystemExit("geen .env gevonden: zet VERZENDINGEN_ENV of leg hem in D:/Projects/verzendingen/.env")
+OUT_DIR=os.path.dirname(os.path.abspath(ENV_FILE))  # Excel exports land next to the credentials (the verzendingen folder)
 env={}
 for l in open(ENV_FILE,encoding='utf-8'):
     m=re.match(r'\s*([A-Z_]+)\s*=\s*["\']?([^"\'\s]*)',l)

@@ -289,7 +289,8 @@ footer{grid-column:1/-1;margin-top:24px;padding-top:20px;border-top:1px solid va
   <ol>
     <li>Hylke maakt een Excel-bestand (<code>tools/soorten_afmetingen.py export</code>) met drie tabbladen:
       <ul>
-        <li><strong>Verpakkingsgroepen</strong>: productlijnen die de module aan de titel herkent, met het aantal producten. Onder <em>Afwijkende producten</em> staan producten met een vreemd gewicht: meestal een typfout in het gewicht, soms een ander product (een set). Kijk die eerst na. In een lege rij kun je zelf een stukje titel toevoegen.</li>
+        <li><strong>Verpakkingsgroepen</strong>: productlijnen die de module aan de titel herkent, met het aantal producten. Daaronder <em>voorstellen</em>: producten met dezelfde naam en ongeveer hetzelfde gewicht, zoals alle Grass Tufts. Kijk bij een voorstel of ze echt in dezelfde verpakking gaan; zo niet, laat de rij leeg. Onder <em>Afwijkende producten</em> staan producten met een vreemd gewicht: meestal een typfout in het gewicht, soms een ander product (een set). Kijk die eerst na. In een lege rij kun je zelf een stukje titel toevoegen.</li>
+        <li><strong>Losse producten</strong>: lichte producten zonder maat die in geen groep passen. Een werklijst: meet de bovenste en vul de maat in op de productpagina, of geef ze een maatklasse-tag. Mag de app verkoopcijfers lezen (recht <em>read_orders</em>), dan staan de bestverkochte bovenaan, ook bij de groepen.</li>
         <li><strong>Soorten</strong>: leverancier + type. Alleen invullen als alle producten van die soort dezelfde verpakking hebben (zie het gewicht van–tot).</li>
         <li><strong>Maatklassen</strong>: voor producten die verschillen, zoals miniaturen. Verzin een tag (bijvoorbeeld <code>maat-klein</code>), vul de maat in, en geef producten die tag in Shopify: Producten → producten aanvinken → Meer acties → Tags toevoegen.</li>
       </ul>

@@ -170,7 +170,10 @@ Logs: `npm run tail`.
 - `tools/profiles_carrier.py show` the General delivery profile's zones and rates (legacy model only, read-only)
 - `tools/inactive_rates.py show` hidden fixed rates in the General profile (legacy model only, read-only)
 - `tools/soorten_afmetingen.py export|import <file> [--dry]` Excel to set size + weight once per packaging group
-  (title), supplier + type, or size class (tag); `import` merges them into the rules field (compareDigest guarded)
+  (title), supplier + type, or size class (tag); `import` merges them into the rules field (compareDigest guarded).
+  The export also suggests groups (same supplier, type, name stem, every product the text matches within 30% of
+  the median weight) and lists the unmeasured light products in no group as a worklist; with `read_orders` on
+  the app both are sorted by units sold (last 60 days without `read_all_orders`).
 - `tools/capaciteit_afmetingen.py [out.xlsx]` read-only Excel: per variant the capacity and where it comes from,
   computed by the Worker's own code through `tools/resolve_capacity.ts` (needs Node)
 - `tools/setshop.py` / `tools/setrates.py` write `defaults.json` / `rates.json` to the shop metafields

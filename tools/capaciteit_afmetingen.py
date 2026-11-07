@@ -2,7 +2,7 @@
 
   python tools/capaciteit_afmetingen.py [uitvoer.xlsx]
 
-Default output: D:/Projects/verzendingen/capaciteit_afmetingen_<datum>.xlsx
+Default output: capaciteit_afmetingen_<datum>.xlsx in the verzendingen folder (next to .env)
 Read-only: changes nothing in Shopify. Uses the shop's rules (custom.brievenbus_capaciteit_standaard)
 and the Worker's own logic through tools/resolve_capacity.ts, so it needs Node (npm install).
 Packed dimensions need Admin API 2027-01 (a release candidate until 1 January 2027).
@@ -12,7 +12,7 @@ from collections import Counter
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
 from openpyxl.utils import get_column_letter
-from shipauth import gql, STORE
+from shipauth import gql, STORE, OUT_DIR
 
 DIM_API = "2027-01"
 TO_CM = {"CENTIMETERS": 1, "INCHES": 2.54}
@@ -101,7 +101,7 @@ for row, out in zip(rows, json.loads(res.stdout)):
     row[12] = out["group"] or ""
 
 rows.sort(key=lambda r: (r[5] != "actief", r[10] == 0, r[3], r[4], r[0], r[1]))
-out = sys.argv[1] if len(sys.argv) > 1 else f"D:/Projects/verzendingen/capaciteit_afmetingen_{datetime.date.today():%Y-%m-%d}.xlsx"
+out = sys.argv[1] if len(sys.argv) > 1 else os.path.join(OUT_DIR, f"capaciteit_afmetingen_{datetime.date.today():%Y-%m-%d}.xlsx")
 
 wb = Workbook()
 ws = wb.active
