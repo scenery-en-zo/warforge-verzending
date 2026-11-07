@@ -1,4 +1,4 @@
-import os, re, requests
+import os, re, time, requests
 # Credentials: $VERZENDINGEN_ENV, else the Windows checkout, else ~/Projects/verzendingen (Linux).
 ENV_FILE=next((p for p in (os.environ.get("VERZENDINGEN_ENV"),'D:/Projects/verzendingen/.env',
                           os.path.expanduser('~/Projects/verzendingen/.env')) if p and os.path.exists(p)),None)
@@ -13,7 +13,14 @@ API="2026-10"
 tok=requests.post(f"https://{STORE}/admin/oauth/access_token",data={"grant_type":"client_credentials","client_id":env["CLIENT_ID"],"client_secret":env["CLIENT_SECRET"]}).json()["access_token"]
 H={"X-Shopify-Access-Token":tok,"Content-Type":"application/json"}
 def gql(q,v=None,version=API):
-    return requests.post(f"https://{STORE}/admin/api/{version}/graphql.json",headers=H,json={"query":q,"variables":v or {}}).json()
+    # Shopify answers THROTTLED when the query-cost bucket is empty: wait for it to refill and retry.
+    for attempt in range(8):
+        r=requests.post(f"https://{STORE}/admin/api/{version}/graphql.json",headers=H,json={"query":q,"variables":v or {}}).json()
+        errs=r.get("errors") if isinstance(r.get("errors"),list) else []
+        if not any(isinstance(e,dict) and (e.get("extensions") or {}).get("code")=="THROTTLED" for e in errs):
+            return r
+        time.sleep(min(2**attempt,20))
+    return r
 
 def market_driven():
     """True when the shop is on market-driven shipping (rates per market, delivery profiles no longer live)."""

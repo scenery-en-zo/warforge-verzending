@@ -12,6 +12,7 @@ export type Env = {
   CARRIER_CLIENT_ID: string; // secret
   CARRIER_CLIENT_SECRET: string; // secret
   DIMENSIONS_API_VERSION?: string; // wrangler.toml [vars]; Admin API version that has packedDimensions
+  RULES_PATCH?: string; // LOCAL TESTING ONLY (.dev.vars): JSON laid over the shop's capacity rules
 };
 
 const PRODUCT_TTL_MS = 10 * 60 * 1000;
@@ -65,6 +66,7 @@ const PRODUCTS_QUERY = `
     nodes(ids: $ids) {
       ... on Product {
         id
+        title
         productType
         vendor
         tags
@@ -92,11 +94,23 @@ function parseJson<T>(raw: string | null | undefined): T | null {
   }
 }
 
+/** Lay a rules patch over the shop rules: top-level keys replace, the by_* tables merge per entry. */
+export function patchRules(rules: Rules, raw: string | undefined): Rules {
+  const patch = parseJson<Rules>(raw);
+  if (!patch) return rules;
+  const out: Rules = { ...rules, ...patch };
+  for (const k of ["by_type", "by_vendor_type", "by_collection", "by_tag", "by_title"] as const) {
+    if (patch[k]) out[k] = { ...rules[k], ...patch[k] };
+  }
+  return out;
+}
+
 export async function loadRules(env: Env): Promise<{ rules: Rules; rates: RatesConfig | null }> {
   if (rulesCache && Date.now() - rulesCache.at < RULES_TTL_MS) return rulesCache.value;
   try {
     const data = await graphql<{ shop: { rules: { value: string } | null; rates: { value: string } | null } }>(env, RULES_QUERY);
-    const value = { rules: parseJson<Rules>(data.shop.rules?.value) ?? {}, rates: parseJson<RatesConfig>(data.shop.rates?.value) };
+    if (env.RULES_PATCH) console.warn("[carrier] RULES_PATCH is set: the shop rules are overridden (local testing only)");
+    const value = { rules: patchRules(parseJson<Rules>(data.shop.rules?.value) ?? {}, env.RULES_PATCH), rates: parseJson<RatesConfig>(data.shop.rates?.value) };
     rulesCache = { value, at: Date.now() };
     return value;
   } catch (err) {
@@ -119,7 +133,7 @@ export async function loadProducts(env: Env, productIds: string[]): Promise<Map<
   if (missing.length === 0) return out;
   try {
     const data = await graphql<{ nodes: Array<null | {
-      id: string; productType: string | null; vendor: string | null; tags: string[];
+      id: string; title: string | null; productType: string | null; vendor: string | null; tags: string[];
       collections: { nodes: { handle: string }[] };
       capaciteit: { value: string } | null; groep: { value: string } | null;
     }> }>(env, PRODUCTS_QUERY, { ids: missing.map((id) => `gid://shopify/Product/${id}`) });
@@ -128,6 +142,7 @@ export async function loadProducts(env: Env, productIds: string[]): Promise<Map<
       const id = node.id.split("/").pop()!;
       const cap = node.capaciteit?.value != null ? Number(node.capaciteit.value) : null;
       const info: ProductInfo = {
+        title: node.title ?? "",
         productType: node.productType ?? "",
         vendor: node.vendor ?? "",
         tags: node.tags ?? [],

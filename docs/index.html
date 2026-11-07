@@ -123,8 +123,8 @@ footer{grid-column:1/-1;margin-top:24px;padding-top:20px;border-top:1px solid va
   <h2>In het kort</h2>
   <div class="summary">
     <ul>
-      <li><strong>Elk product heeft een brievenbuscapaciteit:</strong> hoeveel stuks ervan passen in één A5-brievenbuspakket. Verf: 10, kwasten: 8, terrein: 1, en zo verder. <strong>0</strong> betekent: past nooit.</li>
-      <li><strong>Afmetingen gaan voor.</strong> Staan bij een product lengte, breedte en hoogte ingevuld (productpagina → blok <em>Verzending</em>), dan rekent de webshop met die maten en het gewicht zelf uit óf het past en hoe vaak. Een capaciteit invullen is dan niet meer nodig.</li>
+      <li><strong>Elk product heeft een brievenbuscapaciteit:</strong> hoeveel stuks ervan passen in één A5-brievenbuspakket. <strong>0</strong> betekent: past nooit.</li>
+      <li><strong>Alleen gemeten producten kunnen door de brievenbus.</strong> De webshop rekent de capaciteit zelf uit met de maat en het gewicht: de eigen afmetingen van het product (productpagina → blok <em>Verzending</em>), of één maat voor een hele groep, zoals alle Reaper MSP-potjes. Peter kan ook zelf een getal invullen. <strong>Zonder maat is het altijd een pakket.</strong></li>
       <li><strong>Bij het afrekenen telt de webshop op</strong> hoeveel van het pakket elke regel in de winkelwagen gebruikt. Blijft dat samen op of onder 100%, dan is het een brievenbuspakket (€ 4,95). Anders een pakket.</li>
       <li><strong>Brievenbuspakket alleen in Nederland.</strong> België, Duitsland en de rest van Europa krijgen altijd een pakkettarief.</li>
       <li><strong>Gratis verzending vanaf € 100</strong> is een aparte automatische korting en geldt alleen voor Nederland.</li>
@@ -143,12 +143,9 @@ footer{grid-column:1/-1;margin-top:24px;padding-top:20px;border-top:1px solid va
       <ol>
         <li>de tag <code>geen-brievenbus</code> op het product: dan altijd een pakket</li>
         <li>de <em>afmetingen</em> en het <em>gewicht</em> uit het blok Verzending, als lengte, breedte én hoogte zijn ingevuld (zie <a href="#afmetingen">Afmetingen</a>)</li>
-        <li>het veld <em>Brievenbus capaciteit</em> op de productpagina zelf</li>
-        <li>een regel voor de <em>collectie</em> waar het product in zit</li>
-        <li>een regel voor een <em>tag</em> van het product</li>
-        <li>een regel voor <em>leverancier + type</em> (bijvoorbeeld Reaper Miniatures + Miniature)</li>
-        <li>een regel voor het <em>producttype</em> (Paint, Brush, Terrain…)</li>
-        <li>de <em>standaard</em> voor alles wat nergens genoemd wordt (nu: 2)</li>
+        <li>het veld <em>Brievenbus capaciteit</em> op de productpagina zelf (een getal dat Peter invult)</li>
+        <li>een <em>maat voor de groep</em> waar het product bij hoort, in deze volgorde: de collectie, een tag, de titel (een productlijn zoals "Reaper MSP Core Colors"), leverancier + type, het producttype (zie <a href="#groepsmaat">Eén keer meten</a>)</li>
+        <li><strong>niets gemeten: pakket.</strong> Een regel met 0 ("nooit") telt nog wel, en ook de gewichtsregel voor Reaper-miniaturen als de mini een gewicht heeft.</li>
       </ol>
     </li>
     <li><strong>De module telt op hoeveel pakket er gebruikt wordt</strong>Elke regel gebruikt <em>aantal ÷ capaciteit</em> van het pakket. Drie potjes verf met capaciteit 10 gebruiken 3/10, één kwast met capaciteit 8 gebruikt 1/8.
@@ -157,7 +154,7 @@ footer{grid-column:1/-1;margin-top:24px;padding-top:20px;border-top:1px solid va
     <li><strong>Vier extra controles</strong>Het wordt alsnog een pakket als één van deze waar is:
       <ul>
         <li>een product heeft capaciteit <strong>0</strong> (past nooit);</li>
-        <li>één los artikel weegt meer dan <strong>250 gram</strong> (alleen bij producten zonder afmetingen);</li>
+        <li>één los artikel weegt meer dan <strong>250 gram</strong> (alleen bij producten zonder maat);</li>
         <li>de hele bestelling weegt meer dan <strong>2000 gram</strong> (de PostNL-grens);</li>
         <li>er zitten producten in met een <em>groep</em> (bijvoorbeeld "matten") samen met producten uit een andere groep of zonder groep. Producten met een groep mogen alleen met soortgenoten in één brievenbuspakket.</li>
       </ul>
@@ -169,7 +166,7 @@ footer{grid-column:1/-1;margin-top:24px;padding-top:20px;border-top:1px solid va
 
 <section id="voorbeelden">
   <h2>Rekenvoorbeelden</h2>
-  <p class="where">Een paar winkelwagens, allemaal naar een Nederlands adres (behalve de laatste), met de huidige standaardwaarden.</p>
+  <p class="where">Een paar winkelwagens, allemaal naar een Nederlands adres (behalve de laatste). Ze gaan ervan uit dat de producten een maat hebben (eigen afmetingen, een groepsmaat of een getal van Peter); een product zonder maat maakt er altijd een pakket van.</p>
   <div class="bons">
     <div class="bon">
       <h4>Winkelwagen A</h4>
@@ -246,6 +243,7 @@ footer{grid-column:1/-1;margin-top:24px;padding-top:20px;border-top:1px solid va
     <thead><tr><th>Wat</th><th>Waar in Shopify</th><th>Gebruik dit als…</th></tr></thead>
     <tbody>
       <tr><td><strong>Afmetingen van een product</strong></td><td>Productpagina → blok <em>Verzending</em> → lengte, breedte, hoogte</td><td>…de webshop zelf moet uitrekenen of en hoe vaak het in het brievenbuspakket past. Gaat vóór alles hieronder.</td></tr>
+      <tr><td><strong>Maat voor een hele groep</strong></td><td>Het Excel-bestand van Hylke (Verpakkingsgroepen), of Instellingen → Shop-metavelden → <em>Brievenbus capaciteit standaard</em></td><td>…veel producten dezelfde verpakking hebben, zoals alle MSP-verfpotjes. Eén keer meten is genoeg.</td></tr>
       <tr><td><strong>Nooit als brievenbuspakket</strong></td><td>Productpagina → <em>Tags</em> → <code>geen-brievenbus</code></td><td>…een product er op maat wel in past, maar toch altijd als pakket moet (breekbaar, duur).</td></tr>
       <tr><td><strong>Capaciteit van één product</strong></td><td>Producten → productpagina → blok <em>Metavelden</em> → <em>Brievenbus capaciteit</em></td><td>…dit ene product afwijkt van zijn type (dikker doosje, extra klein, enzovoort).</td></tr>
       <tr><td><strong>Groep van één product</strong></td><td>Zelfde blok → <em>Brievenbus groep</em></td><td>…een product wel in een brievenbuspakket past, maar alleen met soortgenoten (matten).</td></tr>
@@ -279,20 +277,37 @@ footer{grid-column:1/-1;margin-top:24px;padding-top:20px;border-top:1px solid va
     </tbody>
   </table>
   </div>
-  <div class="note"><p><strong>Let op bij het invullen.</strong> Vul alle drie de maten in, in centimeters, van het product zoals het verstuurd wordt (met doosje of zakje). Ontbreekt er één, dan gebruikt de module de oude regels. Rond liever een paar millimeter naar boven af: met een te kleine maat past het pakketje straks niet door de brievenbus.</p></div>
+  <div class="note"><p><strong>Let op bij het invullen.</strong> Vul alle drie de maten in, in centimeters, van het product zoals het verstuurd wordt (met doosje of zakje). Ontbreekt er één, dan kijkt de module naar het productveld en de maat van de groep; is er niets, dan wordt het een pakket. Rond liever een paar millimeter naar boven af: met een te kleine maat past het pakketje straks niet door de brievenbus.</p></div>
   <h3>Wat er anders is dan bij de capaciteit</h3>
   <ul>
     <li>Het veld <em>Brievenbus capaciteit</em> telt niet meer zodra de afmetingen compleet zijn, ook niet als daar 0 staat (zoals bij de 1065 producten die vroeger in het profiel "General" zaten).</li>
     <li>De grens van 250 gram per artikel geldt niet voor producten met afmetingen. Die grens was een schatting ("zwaar is meestal dik"); met de echte maten is die niet meer nodig. De 2000 gram voor het hele pakket blijft.</li>
     <li>Een <em>Brievenbus groep</em> blijft gewoon werken.</li>
   </ul>
+  <h3 id="groepsmaat">Eén keer meten voor een hele groep</h3>
+  <p>Veel producten zitten in precies dezelfde verpakking: alle Reaper MSP Core Colors-potjes (199 stuks), de Bones-potjes, de HD Pigments. Meet er één, met verpakking, en vul die maat één keer in voor de hele groep. De module gebruikt hem dan voor elk product van die groep, ook voor nieuwe producten die later bijkomen.</p>
+  <ol>
+    <li>Hylke maakt een Excel-bestand (<code>tools/soorten_afmetingen.py export</code>) met drie tabbladen:
+      <ul>
+        <li><strong>Verpakkingsgroepen</strong>: productlijnen die de module aan de titel herkent, met het aantal producten. Onder <em>Afwijkende producten</em> staan producten met een vreemd gewicht: meestal een typfout in het gewicht, soms een ander product (een set). Kijk die eerst na. In een lege rij kun je zelf een stukje titel toevoegen.</li>
+        <li><strong>Soorten</strong>: leverancier + type. Alleen invullen als alle producten van die soort dezelfde verpakking hebben (zie het gewicht van–tot).</li>
+        <li><strong>Maatklassen</strong>: voor producten die verschillen, zoals miniaturen. Verzin een tag (bijvoorbeeld <code>maat-klein</code>), vul de maat in, en geef producten die tag in Shopify: Producten → producten aanvinken → Meer acties → Tags toevoegen.</li>
+      </ul>
+    </li>
+    <li>Peter vult de gele kolommen in: lengte, breedte, hoogte in cm, en eventueel het gewicht (leeg = het eigen gewicht van elk product).</li>
+    <li>Hylke zet het in de winkel (<code>import</code>, eerst met <code>--dry</code> om te zien wat er verandert). Binnen 2 minuten rekent de module ermee.</li>
+  </ol>
+  <p>Er wordt niets gewist: lege rijen worden overgeslagen. Een eigen afmeting of een getal van Peter in het productveld gaat altijd voor de maat van de groep.</p>
+  <h3>Niet gemeten: pakket</h3>
+  <p>Een product zonder eigen afmetingen, zonder getal in het productveld en zonder groepsmaat gaat als pakket, want dan weten we niet of het past. De oude getallen per type (verf 10, kwasten 8 …) tellen daarom niet meer mee. Uitzonderingen: een regel met 0 betekent nog steeds "nooit", en Reaper-miniaturen met een gewicht volgen de gewichtsregel (tot 30 g: 5, tot 85 g: 2).</p>
+  <p>Terug naar de oude getallen per type, bijvoorbeeld tijdelijk? Zet <code>"unmeasured_parcel_only": false</code> in <a href="#standaard">Brievenbus capaciteit standaard</a>.</p>
   <h3>Past wel, maar mag er toch nooit in</h3>
   <p>Geef het product de tag <code>geen-brievenbus</code>. Die wint van alles, ook van de afmetingen. Liever een andere tag? Zet <code>"never_tag": "jouw-tag"</code> in <a href="#standaard">Brievenbus capaciteit standaard</a>.</p>
   <h3>Andere brievenbusdoos</h3>
   <p>Gebruik je een andere doos, zet dan de binnenmaat in <em>Brievenbus capaciteit standaard</em>: <code>"letterbox_box_cm": [21, 14.8, 3.2]</code>. Drie getallen in centimeters, met een punt als decimaalteken, de volgorde maakt niet uit. PostNL staat voor een brievenbuspakje maximaal 38 × 26,5 × 3,2 cm toe.</p>
   <h3>Controleren wat de module uitrekent</h3>
-  <p>Hylke kan een Excel-overzicht maken met per variant de afmetingen, het gewicht en de capaciteit die de module uitrekent (<code>tools/capaciteit_afmetingen.py</code>). Daarin zie je ook welke producten nog geen afmetingen hebben.</p>
-  <div class="note g"><p><strong>Vanaf wanneer?</strong> Shopify geeft de afmetingen aan apps door vanaf versie 2027-01 van de koppeling; tot 1 januari 2027 is dat nog een proefversie. Lukt het ophalen niet, dan valt de module vanzelf terug op de capaciteitsregels. Er gaat dan niets mis: het wordt hooguit even op de oude manier berekend.</p></div>
+  <p>Hylke kan een Excel-overzicht maken met per variant de capaciteit die de module uitrekent en waar die vandaan komt: eigen afmetingen, groepsmaat, productveld of "niet gemeten: pakket" (<code>tools/capaciteit_afmetingen.py</code>). Het rekent met precies dezelfde code als de checkout.</p>
+  <div class="note g"><p><strong>Vanaf wanneer?</strong> Shopify geeft de eigen afmetingen van een product aan apps door vanaf versie 2027-01 van de koppeling; tot 1 januari 2027 is dat nog een proefversie. Lukt het ophalen niet, dan rekent de module 10 minuten lang alleen met het productveld en de groepsmaten.</p></div>
 </section>
 
 <section id="product">
@@ -346,6 +361,9 @@ footer{grid-column:1/-1;margin-top:24px;padding-top:20px;border-top:1px solid va
       <tr><td><code>item_max_grams</code></td><td>Weegt één los artikel meer dan dit, dan is het altijd een pakket. Een zwaar ding is meestal ook een dik ding. Geldt alleen voor producten zonder afmetingen.</td></tr>
       <tr><td><code>letterbox_box_cm</code></td><td>Niet verplicht. Binnenmaat van de brievenbusdoos in centimeters, voor de berekening op <a href="#afmetingen">afmetingen</a>. Staat het er niet, dan geldt <code>[21, 14.8, 3.2]</code>.</td></tr>
       <tr><td><code>never_tag</code></td><td>Niet verplicht. De producttag die altijd een pakket maakt, ook als de afmetingen passen. Staat het er niet, dan geldt <code>"geen-brievenbus"</code>.</td></tr>
+      <tr><td><code>unmeasured_parcel_only</code></td><td>Niet verplicht. <code>true</code> (ook als het er niet staat): een product zonder maat gaat als pakket. <code>false</code>: de oude getallen per type tellen weer voor producten zonder maat.</td></tr>
+      <tr><td><code>by_title</code></td><td>Groepen op titel: <code>"Reaper MSP Core Colors": { "cm": [2.6, 2.6, 7.6], "gram": 28 }</code> geldt voor elk product waarvan de titel die tekst bevat (hoofdletters maakt niet uit; de langste passende tekst wint). Komt na collectie en tag, vóór leverancier + type.</td></tr>
+      <tr><td><code>"cm"</code> en <code>"gram"</code></td><td>Een maat voor een hele groep, in elke regel (<code>by_title</code>, <code>by_vendor_type</code>, <code>by_type</code>, <code>by_collection</code>, <code>by_tag</code>): <code>{ "cm": [lengte, breedte, hoogte], "gram": gewicht }</code>. De module rekent dan zelf uit hoeveel er passen. <code>"gram"</code> mag weg: dan telt het eigen gewicht van elk product.</td></tr>
       <tr><td><code>default</code></td><td>Capaciteit voor producten die nergens anders genoemd worden (ook producten zonder type).</td></tr>
       <tr><td><code>by_type</code></td><td>Capaciteit per producttype. De naam moet precies gelijk zijn aan het veld <em>Producttype</em> op de productpagina, inclusief hoofdletters.</td></tr>
       <tr><td><code>by_vendor_type</code></td><td>Capaciteit per combinatie leverancier + type, geschreven als <code>"Leverancier|Type"</code>. Wint van <code>by_type</code>.</td></tr>
@@ -478,6 +496,7 @@ footer{grid-column:1/-1;margin-top:24px;padding-top:20px;border-top:1px solid va
 <section id="huidig">
   <h2>Huidige instellingen</h2>
   <p class="where">Stand van 22 september 2026.</p>
+  <div class="note"><p><strong>Let op:</strong> de getallen per type hieronder tellen niet meer voor producten zonder maat; die gaan als pakket tot ze een maat hebben (zie <a href="#groepsmaat">Eén keer meten</a>). Een 0 en de gewichtsregel voor Reaper-miniaturen tellen nog wel.</p></div>
   <div class="tablewrap">
   <table class="grid">
     <thead><tr><th>Producttype</th><th class="num">Producten</th><th class="num">Per A5-pakket</th><th>Opmerking</th></tr></thead>
@@ -500,6 +519,8 @@ footer{grid-column:1/-1;margin-top:24px;padding-top:20px;border-top:1px solid va
 <section id="faq">
   <h2>Valkuilen en vragen</h2>
   <dl class="faq">
+    <dt>Een klein product wordt toch een pakket.</dt>
+    <dd>Waarschijnlijk heeft het nog geen maat: geen eigen afmetingen, geen getal in het productveld en geen groepsmaat. Vul één daarvan in, en wacht 10 minuten. Het overzicht van Hylke laat per product zien waar de capaciteit vandaan komt.</dd>
     <dt>Ik heb het type van een product veranderd, maar de keuze verandert niet.</dt>
     <dd>Kijk of het product afmetingen heeft of er op de productpagina een <em>Brievenbus capaciteit</em> is ingevuld; die gaan voor het type. Maak het veld leeg om weer de standaard te gebruiken. En wacht 10 minuten.</dd>
     <dt>Een klant kreeg een brievenbuspakket aangeboden dat er niet in past.</dt>

@@ -13,24 +13,33 @@
  *   1. packed dimensions + weight of the variant (Shopify: product > Shipping),
  *      when length, width and height are all filled in: how many pieces fit in
  *      the box (rules.letterbox_box_cm), capped by the weight limit
- *   2. product metafield custom.brievenbus_capaciteit (0 = never fits)
- *   3. rules.by_collection[handle]
- *   4. rules.by_tag[tag]
- *   5. rules.by_vendor_type["Vendor|Type"]  (number, or weight bands)
- *   6. rules.by_type[type]
- *   7. rules.default
+ *   2. product metafield custom.brievenbus_capaciteit (0 = never fits), set by hand
+ *   3. the rules, first match in this order:
+ *        rules.by_collection[handle], rules.by_tag[tag],
+ *        rules.by_title[text] (title contains the text, any case; the longest text wins),
+ *        rules.by_vendor_type["Vendor|Type"], rules.by_type[type]
+ *      A rule is either a MEASUREMENT for every product of that kind,
+ *      { "cm": [l, w, h], "gram": g }  -> capacity as in step 1 (gram is used
+ *      when the variant has no weight of its own), or a CAPACITY: a number,
+ *      { "cap": n }, or weight bands.
+ *   4. nothing measured:
+ *      rules.unmeasured_parcel_only (default true) -> 0, a parcel. Capacity
+ *      numbers > 0 from rules are then guesses and are skipped; a rule of 0
+ *      still means "never", and weight bands still count for a product that
+ *      HAS a weight (the weight is the measurement). With false, capacity rules
+ *      count and rules.default is the last resort (the behaviour before measurements).
  * The group comes from the product metafield custom.brievenbus_groep, else
  * from the first rule (collection/tag/vendor-type/type) that carries a group.
  *
  * `item_max_grams` is a stand-in for thickness ("a heavy thing is usually a
- * thick thing"), so it only applies to pieces WITHOUT dimensions. Pieces with
- * dimensions are judged on their real size and the total weight limit.
+ * thick thing"), so it only applies to pieces WITHOUT measurements. Measured
+ * pieces are judged on their real size and the total weight limit.
  */
 
 export type Band = [maxGrams: number, capacity: number];
 export type Rule =
   | number
-  | { cap?: number; groep?: string; weight_bands?: Band[]; else?: number };
+  | { cap?: number; groep?: string; weight_bands?: Band[]; else?: number; cm?: number[]; gram?: number };
 
 export type Rules = {
   letterbox_max_grams?: number;
@@ -39,17 +48,22 @@ export type Rules = {
   letterbox_box_cm?: number[];
   /** Product tag that forces a parcel, even when the dimensions fit. */
   never_tag?: string;
+  /** Products without a measurement (own or per kind) go as a parcel. Default true. */
+  unmeasured_parcel_only?: boolean;
   default?: number;
   by_type?: Record<string, Rule>;
   by_vendor_type?: Record<string, Rule>;
   by_collection?: Record<string, Rule>;
   by_tag?: Record<string, Rule>;
+  /** Packaging groups by title text, e.g. "Reaper MSP Core Colors": every pot of that line. */
+  by_title?: Record<string, Rule>;
 };
 
 /** Packed (ready-to-ship) size of ONE piece, in centimetres. */
 export type Dims = { length: number; width: number; height: number };
 
 export type ProductInfo = {
+  title?: string;
   productType: string;
   vendor: string;
   tags: string[];
@@ -60,7 +74,8 @@ export type ProductInfo = {
 
 export type Line = { quantity: number; grams: number; product: ProductInfo | null; dims?: Dims | null };
 
-export type Resolved = { capacity: number; group: string | null; source: string };
+/** `grams` is set when the weight came from a rule because the variant has none. */
+export type Resolved = { capacity: number; group: string | null; source: string; grams?: number };
 
 const FALLBACK = {
   letterbox_max_grams: 2000,
@@ -68,6 +83,7 @@ const FALLBACK = {
   default: 2,
   letterbox_box_cm: [21, 14.8, 3.2], // A5 sheet, 3.2 cm = PostNL brievenbus thickness
   never_tag: "geen-brievenbus",
+  unmeasured_parcel_only: true,
 };
 
 /** True when length, width and height are all known (Shopify returns 0 for unset dimensions). */
@@ -117,13 +133,32 @@ function applyRule(rule: Rule | undefined, grams: number): { cap: number; group:
   return null;
 }
 
-/** The rule lookups in resolution order: collection, tag, vendor|type, type. */
-function ruleCandidates(p: ProductInfo, grams: number, rules: Rules) {
+/** A measurement rule { cm: [l, w, h], gram? } for every product of a kind; null for capacity rules. */
+export function ruleMeasurement(rule: Rule | undefined): { dims: Dims; gram: number | null } | null {
+  if (rule == null || typeof rule !== "object" || !Array.isArray(rule.cm) || rule.cm.length !== 3) return null;
+  const [length, width, height] = rule.cm.map(Number);
+  const dims = { length, width, height };
+  if (!hasDims(dims)) return null;
+  return { dims, gram: typeof rule.gram === "number" && rule.gram > 0 ? rule.gram : null };
+}
+
+/** The by_title key whose text the title contains (any case); the longest, most specific one wins. */
+export function titleMatch(title: string | undefined, byTitle: Rules["by_title"]): string | null {
+  const t = (title ?? "").toLowerCase();
+  if (!t || !byTitle) return null;
+  const hits = Object.keys(byTitle).filter((k) => k.trim() && t.includes(k.trim().toLowerCase()));
+  return hits.sort((a, b) => b.trim().length - a.trim().length)[0] ?? null;
+}
+
+/** The rule lookups in resolution order: collection, tag, title, vendor|type, type. */
+function ruleCandidates(p: ProductInfo, rules: Rules): Array<[Rule | undefined, string]> {
+  const title = titleMatch(p.title, rules.by_title);
   return [
-    ...p.collections.map((h) => [applyRule(rules.by_collection?.[h], grams), `collection:${h}`] as const),
-    ...p.tags.map((t) => [applyRule(rules.by_tag?.[t], grams), `tag:${t}`] as const),
-    [applyRule(rules.by_vendor_type?.[`${p.vendor}|${p.productType}`], grams), "vendor_type"] as const,
-    [applyRule(rules.by_type?.[p.productType], grams), "type"] as const,
+    ...p.collections.map((h): [Rule | undefined, string] => [rules.by_collection?.[h], `collection:${h}`]),
+    ...p.tags.map((t): [Rule | undefined, string] => [rules.by_tag?.[t], `tag:${t}`]),
+    ...(title ? [[rules.by_title?.[title], `title:${title}`] as [Rule | undefined, string]] : []),
+    [rules.by_vendor_type?.[`${p.vendor}|${p.productType}`], "vendor_type"],
+    [rules.by_type?.[p.productType], "type"],
   ];
 }
 
@@ -132,14 +167,16 @@ export function resolveCapacity(p: ProductInfo | null, grams: number, rules: Rul
   if (!p) return { capacity: 0, group: null, source: "unknown" };
 
   let group: string | null = p.groupOverride?.trim() || null;
-  const pick = (r: { cap: number; group: string | null } | null, source: string): Resolved | null => {
-    if (!r) return null;
+  const pick = (r: { cap: number; group: string | null }, source: string): Resolved => {
     if (group == null && r.group) group = r.group;
     return { capacity: Math.max(0, Math.floor(r.cap)), group, source };
   };
   // Capacity decided elsewhere (tag, dimensions, product field): the group may still come from a rule.
   const withRuleGroup = (capacity: number, source: string): Resolved => {
-    if (group == null) group = ruleCandidates(p, grams, rules).find(([r]) => r?.group)?.[0]?.group ?? null;
+    if (group == null) {
+      const hit = ruleCandidates(p, rules).find(([r]) => r != null && typeof r === "object" && r.groep);
+      group = (hit?.[0] as { groep?: string } | undefined)?.groep ?? null;
+    }
     return { capacity: Math.max(0, Math.floor(capacity)), group, source };
   };
 
@@ -147,11 +184,25 @@ export function resolveCapacity(p: ProductInfo | null, grams: number, rules: Rul
   if (neverTag && p.tags.includes(neverTag)) return withRuleGroup(0, `tag:${neverTag}`);
   if (hasDims(dims)) return withRuleGroup(capacityFromDims(dims, grams, rules).capacity, "afmetingen");
   if (p.capacityOverride != null && Number.isFinite(p.capacityOverride)) return withRuleGroup(p.capacityOverride, "product");
-  for (const [rule, source] of ruleCandidates(p, grams, rules)) {
-    const r = pick(rule, source);
-    if (r) return r;
+
+  const strict = rules.unmeasured_parcel_only ?? FALLBACK.unmeasured_parcel_only;
+  for (const [rule, source] of ruleCandidates(p, rules)) {
+    const m = ruleMeasurement(rule);
+    if (m) {
+      const g = grams > 0 ? grams : m.gram ?? 0;
+      const res = withRuleGroup(capacityFromDims(m.dims, g, rules).capacity, `afmetingen:${source}`);
+      return g !== grams ? { ...res, grams: g } : res;
+    }
+    const r = applyRule(rule, grams);
+    if (!r) continue;
+    // Strict: a capacity number from a rule is a guess, not a measurement. Keep looking for a
+    // measurement; an explicit 0 ("never") still decides, and so do weight bands for a product
+    // that has a weight.
+    const byWeight = typeof rule === "object" && rule != null && Array.isArray(rule.weight_bands) && grams > 0;
+    if (!strict || r.cap <= 0 || byWeight) return pick(r, source);
+    if (group == null && r.group) group = r.group;
   }
-  return { capacity: rules.default ?? FALLBACK.default, group, source: "default" };
+  return strict ? withRuleGroup(0, "onbekend") : { capacity: rules.default ?? FALLBACK.default, group, source: "default" };
 }
 
 export type FitResult = {
@@ -175,11 +226,12 @@ export function cartFitsLetterbox(lines: Line[], rules: Rules): FitResult {
 
   for (const line of lines) {
     if (line.quantity <= 0) continue;
-    totalGrams += line.grams * line.quantity;
     const r = resolveCapacity(line.product, line.grams, rules, line.dims);
+    const grams = r.grams ?? line.grams; // a variant without weight takes its kind's weight
+    totalGrams += grams * line.quantity;
     details.push(`${line.quantity}x cap ${r.capacity} (${r.source})`);
     if (r.capacity === 0) reasons.push(`parcel-only (${r.source})`);
-    else if (r.source !== "afmetingen" && line.grams > itemMax) reasons.push(`item ${line.grams} g > ${itemMax} g`);
+    else if (!r.source.startsWith("afmetingen") && grams > itemMax) reasons.push(`item ${grams} g > ${itemMax} g`);
     else used += line.quantity / r.capacity;
     if (r.group) groups.add(r.group);
     else ungrouped += line.quantity;
