@@ -1,65 +1,31 @@
-"""Switch the General profile to carrier-calculated rates, then fold in Kleine Artikelen.
+"""Show the General delivery profile: every zone with its carrier and manual rates.
 
-  python profiles_carrier.py 1 <carrierServiceGid>  -> in every zone of the General profile: add the
-                                                       carrier rate, delete the manual rates
-  python profiles_carrier.py 2                      -> move every variant of Kleine Artikelen to General
-  python profiles_carrier.py 3                      -> remove the empty Kleine Artikelen profile
-  python profiles_carrier.py show                   -> print the current state
+  python tools/profiles_carrier.py show
 
-Legacy model only: a shop on market-driven shipping keeps its rates per market, see verzending_markten.py.
+Read-only. The one-time switch to the carrier service (September 2026: carrier rate in every zone,
+Kleine Artikelen folded into General) is done; its write phases 1-3 are in git history
+(git log -- tools/profiles_carrier.py).
+The app no longer writes to the merchant's delivery profiles (Shopify's market-driven shipping
+attestation, 2026-11-07). Adding the carrier to shipping:
+  - old model: by hand in Settings -> Shipping and delivery -> General profile -> the zone -> Add rate ->
+    "Use carrier or app to calculate rates" -> Scenery en Zo verzendregels;
+  - market-driven shipping: python tools/verzending_markten.py carrier <carrierServiceGid>
 """
-import sys, json, time
+import sys
 from shipauth import gql, market_driven, LEGACY_STOP
 
 if market_driven():
     sys.exit(LEGACY_STOP)
 
 GEN = "gid://shopify/DeliveryProfile/141336838474"
-KLEIN = "gid://shopify/DeliveryProfile/142752514378"
-LG = "gid://shopify/DeliveryLocationGroup/143336964426"
-M = """mutation($id:ID!,$p:DeliveryProfileInput!){
-  deliveryProfileUpdate(id:$id, profile:$p){ profile{ id } userErrors{ field message } } }"""
 STATE = """{ deliveryProfile(id:"%s"){ profileLocationGroups{ locationGroupZones(first:10){ nodes{ zone{ id name }
   methodDefinitions(first:20){ nodes{ id name active rateProvider{ __typename ... on DeliveryParticipant{ carrierService{ id name } } ... on DeliveryRateDefinition{ price{ amount } } } } } } } } } }""" % GEN
 
-def state():
-    zones = []
-    for g in gql(STATE)["data"]["deliveryProfile"]["profileLocationGroups"]:
-        for z in g["locationGroupZones"]["nodes"]:
-            zones.append(z)
-    return zones
-
-phase = sys.argv[1] if len(sys.argv) > 1 else "show"
-if phase == "show":
-    for z in state():
+if (sys.argv[1] if len(sys.argv) > 1 else "show") != "show":
+    sys.exit(__doc__)
+for g in gql(STATE)["data"]["deliveryProfile"]["profileLocationGroups"]:
+    for z in g["locationGroupZones"]["nodes"]:
         print(z["zone"]["name"])
         for m in z["methodDefinitions"]["nodes"]:
             rp = m["rateProvider"]
             print("   ", m["name"], rp["__typename"], rp.get("price", {}).get("amount") or rp.get("carrierService", {}).get("name"))
-elif phase == "1":
-    carrier = sys.argv[2]
-    zones_to_update = []
-    to_delete = []
-    for z in state():
-        manual = [m["id"] for m in z["methodDefinitions"]["nodes"] if m["rateProvider"]["__typename"] == "DeliveryRateDefinition"]
-        has_carrier = any(m["rateProvider"]["__typename"] == "DeliveryParticipant" for m in z["methodDefinitions"]["nodes"])
-        to_delete += manual
-        if not has_carrier:
-            zones_to_update.append({"id": z["zone"]["id"], "methodDefinitionsToCreate": [{
-                "name": "Scenery en Zo verzendregels", "active": True,
-                "participant": {"carrierServiceId": carrier, "fixedFee": {"amount": 0, "currencyCode": "EUR"}, "percentageOfRateFee": 0}}]})
-    print("zones getting the carrier rate:", len(zones_to_update), "| manual rates to delete:", len(to_delete))
-    r = gql(M, {"id": GEN, "p": {"locationGroupsToUpdate": [{"id": LG, "zonesToUpdate": zones_to_update}], "methodDefinitionsToDelete": to_delete}})
-    print(r.get("data") or r)
-elif phase == "2":
-    vids = json.load(open("kleine_items.json"))["variants"]
-    for i in range(0, len(vids), 100):
-        r = gql(M, {"id": GEN, "p": {"variantsToAssociate": vids[i:i + 100]}})
-        d = r.get("data", {}).get("deliveryProfileUpdate") if r.get("data") else r
-        print(i, "ok" if d and not d.get("userErrors") else d)
-        time.sleep(0.5)
-elif phase == "3":
-    left = gql("""{ deliveryProfile(id:"%s"){ profileItems(first:1){ nodes{ product{ title } } } } }""" % KLEIN)["data"]["deliveryProfile"]["profileItems"]["nodes"]
-    print("items left in Kleine Artikelen:", len(left))
-    if not left:
-        print(gql("""mutation($id:ID!){ deliveryProfileRemove(id:$id){ job{ id } userErrors{ field message } } }""", {"id": KLEIN}))

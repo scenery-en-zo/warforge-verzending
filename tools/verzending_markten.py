@@ -6,8 +6,8 @@ For this shop that means:
   - the carrier service "Scenery en Zo verzendregels" is a carrier-calculated option per market;
   - the hidden fixed rates for the PostNL app are weight-based options that start at 999 kg,
     so a buyer never sees them.
-The legacy tools (profiles_carrier.py, inactive_rates.py) write to the General delivery profile.
-Once a shop has moved, those writes report success but change nothing, so they now refuse to run.
+The legacy tools (profiles_carrier.py, inactive_rates.py) only read the General delivery profile;
+the app never writes to the merchant's profiles (Shopify's market-driven shipping attestation).
 
   python tools/verzending_markten.py status
         which model the shop uses, every market with its countries and shipping options
@@ -99,7 +99,7 @@ def update(m, shipping):
 
 def require_market_driven():
     if not market_driven():
-        sys.exit("Deze winkel gebruikt nog verzendprofielen. Gebruik daar profiles_carrier.py / inactive_rates.py;\n"
+        sys.exit("Deze winkel gebruikt nog verzendprofielen. Pas daar tarieven met de hand aan in Verzending en bezorging;\n"
                  "dit script is voor na de overstap naar marktgestuurde verzending.")
 
 

@@ -26,4 +26,4 @@ if not mine:
     # Since Admin API 2026-10 a new carrier service is only registered, not added to any shipping.
     print("\nLet op: Shopify zet een nieuwe verzendmodule niet meer zelf bij de verzending. Voeg hem toe met")
     print("  python tools/verzending_markten.py carrier <carrierService id hierboven>   (marktgestuurde verzending)")
-    print("  python tools/profiles_carrier.py 1 <carrierService id hierboven>          (oude verzendprofielen)")
+    print("  of met de hand: Verzending en bezorging -> General profile -> zone -> Tarief toevoegen (oude verzendprofielen)")

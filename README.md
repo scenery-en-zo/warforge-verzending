@@ -78,13 +78,12 @@ sets to the same text. The shop owner links each hidden rate to a PostNL product
 Rule: when a rate name is added or changed in `custom.verzendtarieven`, add the hidden rate
 too and link it in the PostNL app:
 
-```bash
-python tools/inactive_rates.py addhidden "Nederland" "Naam van het tarief" 7.75
-python tools/inactive_rates.py show
-```
-
-After the move to market-driven shipping (below) the hidden rates are weight-based options per
-market: `python tools/verzending_markten.py addhidden <markt> "Naam van het tarief" 7.75`.
+- old model (delivery profiles): by hand in Settings → Shipping and delivery → General profile →
+  the zone → Add rate, same name and price, condition "Based on order weight", minimum 999 kg.
+  The app no longer writes to the merchant's profiles (see the attestation below);
+  `python tools/inactive_rates.py show` lists what is there.
+- market-driven shipping: the hidden rates are weight-based options per market:
+  `python tools/verzending_markten.py addhidden <markt> "Naam van het tarief" 7.75`.
 
 ## Market-driven shipping (marktgestuurde verzending)
 
@@ -99,8 +98,10 @@ value-based, carrier-calculated) under Settings → Markets → market → Shipp
   no longer adds a new service to the General profile at all, so after (re)registering it has
   to be added explicitly: `tools/verzending_markten.py carrier <gid>`.
 - **Merchant delivery profile APIs are deprecated** for market-driven shops: reads return a
-  stale snapshot and writes succeed without changing anything. `profiles_carrier.py` and
-  `inactive_rates.py` therefore refuse to run once `shop.features.marketDrivenShipping` is true.
+  stale snapshot and writes succeed without changing anything. The app never calls
+  `deliveryProfileCreate/Update/Remove` on merchant profiles (attested to Shopify 2026-11-07);
+  `profiles_carrier.py` and `inactive_rates.py` only read, and refuse once
+  `shop.features.marketDrivenShipping` is true.
 - Writes go through `marketUpdate(delivery.shipping.optionDefinitionsToCreate/Delete)`; this
   needs the scopes `read_markets` and `write_markets` on the app.
 - Markets whose `delivery.shipping` is null inherit from their parent; the tool never writes
@@ -156,8 +157,8 @@ Logs: `npm run tail`.
 
 - `tools/register_carrier.py <callback-url>` register/update the carrier service in Shopify
 - `tools/verzending_markten.py status|carrier|addhidden|remove` shipping per market (market-driven shipping)
-- `tools/profiles_carrier.py show|1 <carrierGid>|2|3` switch the delivery profile to the carrier (legacy model only)
-- `tools/inactive_rates.py show|addhidden|remove` hidden fixed rates in the General profile (legacy model only)
+- `tools/profiles_carrier.py show` the General delivery profile's zones and rates (legacy model only, read-only)
+- `tools/inactive_rates.py show` hidden fixed rates in the General profile (legacy model only, read-only)
 - `tools/capaciteit_afmetingen.py [out.xlsx]` read-only Excel: per variant the dimensions, weight and computed capacity
   (same calculation as `src/letterbox.ts`, keep both in step)
 - `tools/setshop.py` / `tools/setrates.py` write `defaults.json` / `rates.json` to the shop metafields

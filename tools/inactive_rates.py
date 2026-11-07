@@ -1,54 +1,37 @@
-"""Inactive manual rates with the same names as the carrier rates, so the PostNL app can link them.
+"""Show the hidden fixed rates that mirror the carrier rate names, so the PostNL app can link them.
 
-An inactive rate is never offered at checkout; it only exists so the PostNL app lists it under
-"Standaard exportinstellingen". (Authorised by the shop owner on 2026-09-22.)
+A hidden rate is never offered at checkout (condition: order weight >= 999 kg); it only exists so the
+PostNL app lists it under "Standaard exportinstellingen".
 
   python tools/inactive_rates.py show
-  python tools/inactive_rates.py add "Nederland" "Brievenbuspakket" 4.95
-  python tools/inactive_rates.py remove "Nederland" "Brievenbuspakket"
 
-Legacy model only: on market-driven shipping use `verzending_markten.py addhidden <markt> <naam> <prijs>`.
+Read-only. The app no longer writes to the merchant's delivery profiles (Shopify's market-driven
+shipping attestation, 2026-11-07). Adding a hidden rate:
+  - old model (delivery profiles): by hand in Settings -> Shipping and delivery -> General profile ->
+    the zone -> Add rate: same name and price, condition "Based on order weight", minimum 999 kg;
+  - market-driven shipping: python tools/verzending_markten.py addhidden <markt> "<naam>" <prijs>
+The add/addhidden/remove commands that wrote to the General profile are in git history
+(git log -- tools/inactive_rates.py).
 """
-import sys, json
+import sys
 from shipauth import gql, market_driven, LEGACY_STOP
 
 if market_driven():
     sys.exit(LEGACY_STOP)
 
 GEN = "gid://shopify/DeliveryProfile/141336838474"
-LG = "gid://shopify/DeliveryLocationGroup/143336964426"
 STATE = """{ deliveryProfile(id:"%s"){ profileLocationGroups{ locationGroupZones(first:10){ nodes{ zone{ id name }
   methodDefinitions(first:30){ nodes{ id name active methodConditions{ field operator conditionCriteria{ __typename ... on Weight{ value unit } ... on MoneyV2{ amount } } }
     rateProvider{ __typename ... on DeliveryParticipant{ carrierService{ name } } ... on DeliveryRateDefinition{ price{ amount } } } } } } } } } }""" % GEN
-M = """mutation($id:ID!,$p:DeliveryProfileInput!){
-  deliveryProfileUpdate(id:$id, profile:$p){ profile{ id } userErrors{ field message } } }"""
-
-
-def zones():
-    return [z for g in gql(STATE)["data"]["deliveryProfile"]["profileLocationGroups"] for z in g["locationGroupZones"]["nodes"]]
-
 
 cmd = sys.argv[1] if len(sys.argv) > 1 else "show"
-if cmd == "show":
-    for z in zones():
+if cmd != "show":
+    sys.exit(__doc__)
+for g in gql(STATE)["data"]["deliveryProfile"]["profileLocationGroups"]:
+    for z in g["locationGroupZones"]["nodes"]:
         print(z["zone"]["name"])
         for m in z["methodDefinitions"]["nodes"]:
             rp = m["rateProvider"]
             extra = rp["carrierService"]["name"] if "carrierService" in rp else "EUR " + rp["price"]["amount"]
             conds = ", ".join(f'{c["field"]} {c["operator"]} {c["conditionCriteria"]}' for c in m["methodConditions"]) or "no conditions"
             print("   ", m["name"], "|", "active" if m["active"] else "INACTIVE", "|", extra, "|", conds)
-elif cmd in ("add", "addhidden", "remove"):
-    zone_name, rate_name = sys.argv[2], sys.argv[3]
-    z = next(z for z in zones() if z["zone"]["name"] == zone_name)
-    if cmd in ("add", "addhidden"):
-        price = float(sys.argv[4])
-        md = {"name": rate_name, "active": cmd == "addhidden", "rateDefinition": {"price": {"amount": price, "currencyCode": "EUR"}}}
-        if cmd == "addhidden":  # active, but only for orders of 999 kg or more: never shown at checkout
-            md["weightConditionsToCreate"] = [{"criteria": {"value": 999, "unit": "KILOGRAMS"}, "operator": "GREATER_THAN_OR_EQUAL_TO"}]
-        p = {"locationGroupsToUpdate": [{"id": LG, "zonesToUpdate": [{"id": z["zone"]["id"], "methodDefinitionsToCreate": [md]}]}]}
-    else:
-        ids = [m["id"] for m in z["methodDefinitions"]["nodes"] if m["name"] == rate_name and m["rateProvider"]["__typename"] == "DeliveryRateDefinition"]
-        print("deleting", ids)
-        p = {"methodDefinitionsToDelete": ids}
-    r = gql(M, {"id": GEN, "p": p})
-    print(json.dumps(r.get("data") or r, ensure_ascii=False))

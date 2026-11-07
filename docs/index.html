@@ -425,7 +425,7 @@ footer{grid-column:1/-1;margin-top:24px;padding-top:20px;border-top:1px solid va
     </tbody>
   </table>
   </div>
-  <div class="note"><p><strong>Nieuw tarief of andere naam?</strong> Pas dan drie dingen aan: de naam in <em>Verzendtarieven</em>, het verborgen tarief in het verzendprofiel of, na de overstap, in de markt (vraag Hylke, dat gaat met een script) en de koppeling in de PostNL-app. Een bestelling met een naam die de app niet kent krijgt "Standaard zending + retour bij geen gehoor" en de melding "Verzendmethode werd niet herkend"; je kunt hem dan nog handmatig exporteren op de detailpagina van de bestelling in de app.</p></div>
+  <div class="note"><p><strong>Nieuw tarief of andere naam?</strong> Pas dan drie dingen aan: de naam in <em>Verzendtarieven</em>, het verborgen tarief (nu met de hand in het verzendprofiel: zone → tarief toevoegen, zelfde naam en prijs, voorwaarde orderwicht vanaf 999 kg; na de overstap per markt, dat gaat met een script van Hylke) en de koppeling in de PostNL-app. Een bestelling met een naam die de app niet kent krijgt "Standaard zending + retour bij geen gehoor" en de melding "Verzendmethode werd niet herkend"; je kunt hem dan nog handmatig exporteren op de detailpagina van de bestelling in de app.</p></div>
   <p>Het lege gewicht van de verpakkingen staat onder Instellingen → Verzending en bezorging → Pakketten: 0,25 kg voor het standaardpakket en 0,05 kg voor het brievenbuspakje. Shopify telt dit op bij het artikelgewicht en geeft het totaal door aan de PostNL-app.</p>
 </section>
 
@@ -438,7 +438,7 @@ footer{grid-column:1/-1;margin-top:24px;padding-top:20px;border-top:1px solid va
     <li><strong>De verzendmodule zelf blijft werken.</strong> Shopify vraagt de tarieven op precies dezelfde manier op, in het oude en in het nieuwe systeem.</li>
     <li><strong>De module moet in elke markt aan staan.</strong> In het nieuwe systeem is "Scenery en Zo verzendregels" per markt een verzendoptie die door de vervoerder (de module) berekend wordt. Shopify zet de bestaande koppeling bij de overstap om. Een markt zonder die optie krijgt geen tarief van de module.</li>
     <li><strong>De verborgen tarieven voor de PostNL-app</strong> worden per markt een verzendoptie op gewicht die pas vanaf 999 kg geldt, net als nu.</li>
-    <li><strong>De scripts die het verzendprofiel aanpasten</strong> doen na de overstap niets meer: Shopify accepteert de wijziging, maar er verandert niets. Ze weigeren nu te draaien en verwijzen naar het nieuwe script <code>tools/verzending_markten.py</code>.</li>
+    <li><strong>De app schrijft niet meer in het verzendprofiel.</strong> Dat hebben we zo aan Shopify bevestigd. Een verborgen tarief erbij zet je tot de overstap met de hand in het verzendprofiel; daarna gaat het per markt met het script <code>tools/verzending_markten.py</code>.</li>
   </ul>
   <h3>Controle na de overstap</h3>
   <ol>
